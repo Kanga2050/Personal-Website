@@ -179,6 +179,22 @@ const TechnoUniverseNode = ({ onNavigate }) => {
           </motion.div>
         </SceneObject>
 
+        <SceneObject
+          x={50} y={20}
+          size="60px"
+          color="linear-gradient(135deg, #059669, #10b981)"
+          onClick={() => onNavigate('projects')}
+          hoverEffect="pulse"
+        >
+          <motion.div
+            style={{ fontSize: '24px' }}
+            animate={{ rotateZ: [0, 15, -15, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            💼
+          </motion.div>
+        </SceneObject>
+
         <motion.div
           style={dataStreamStyle1}
           animate={{ x: [0, 10, 0] }}

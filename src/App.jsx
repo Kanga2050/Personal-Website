@@ -4,6 +4,8 @@ import StartNode from './nodes/StartNode';
 import TechnoUniverseNode from './nodes/TechnoUniverseNode';
 import EngineeringNode from './nodes/EngineeringNode';
 import MemoryNode from './nodes/MemoryNode';
+import ProjectsNode from './nodes/ProjectsNode';
+import NavigationMenu from './components/NavigationMenu';
 
 const memoryGraph = {
   nodes: {
@@ -30,13 +32,20 @@ const memoryGraph = {
       title: 'Memory Constellation',
       theme: 'nostalgic',
       content: 'Fragments of time, crystallized into navigable space...'
+    },
+    projects: {
+      id: 'projects',
+      title: 'My Projects',
+      theme: 'green',
+      content: 'A collection of creative endeavors and technical achievements...'
     }
   },
   edges: {
     start: ['techno'],
-    techno: ['engineering', 'memories'],
-    engineering: ['techno'],
-    memories: ['techno']
+    techno: ['engineering', 'memories', 'projects'],
+    engineering: ['techno', 'projects'],
+    memories: ['techno', 'projects'],
+    projects: ['techno', 'engineering', 'memories']
   }
 };
 
@@ -69,6 +78,8 @@ const MyUniverse = () => {
         return <EngineeringNode onNavigate={navigate} />;
       case 'memories':
         return <MemoryNode onNavigate={navigate} />;
+      case 'projects':
+        return <ProjectsNode onNavigate={navigate} />;
       default:
         return <StartNode onTransition={transitionToTechno} />;
     }
@@ -94,6 +105,15 @@ const MyUniverse = () => {
 
   return (
     <div style={{ position: 'relative' }}>
+      {/* Navigation Menu - only show on non-start nodes */}
+      {currentNode !== 'start' && (
+        <NavigationMenu 
+          memoryGraph={memoryGraph}
+          currentNode={currentNode}
+          onNavigate={navigate}
+        />
+      )}
+      
       <AnimatePresence mode="wait">
         {!isTransitioning && (
           <motion.div

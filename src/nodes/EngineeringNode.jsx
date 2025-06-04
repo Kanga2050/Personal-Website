@@ -45,7 +45,15 @@ const EngineeringNode = ({ onNavigate }) => {
     borderRadius: '8px',
     border: 'none',
     cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    margin: '0 8px'
+  };
+
+  const navigationStyle = {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '16px',
+    flexWrap: 'wrap'
   };
 
   return (
@@ -74,17 +82,30 @@ const EngineeringNode = ({ onNavigate }) => {
           The mechanical universe where logic meets creativity. Here, algorithms dance with imagination.
         </motion.p>
 
-        <motion.button
-          style={buttonStyle}
-          whileHover={{ scale: 1.05, backgroundColor: '#60a5fa' }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onNavigate('techno')}
+        <motion.div
+          style={navigationStyle}
           initial={{ y: 30, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.7 }}
         >
-          ← Return to My Universe
-        </motion.button>
+          <motion.button
+            style={buttonStyle}
+            whileHover={{ scale: 1.05, backgroundColor: '#60a5fa' }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onNavigate('techno')}
+          >
+            ← Return to My Universe
+          </motion.button>
+
+          <motion.button
+            style={{...buttonStyle, backgroundColor: '#059669'}}
+            whileHover={{ scale: 1.05, backgroundColor: '#10b981' }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onNavigate('projects')}
+          >
+            Explore My Projects →
+          </motion.button>
+        </motion.div>
       </div>
     </motion.div>
   );
