@@ -110,8 +110,7 @@ const ProjectsNode = ({ onNavigate }) => {
 
   const projectDescStyle = {
     fontSize: '1rem',
-    lineHeight: '1.6',
-    opacity: 0.9
+    lineHeight: '1.6'
   };
 
   const navigationStyle = {
@@ -131,6 +130,67 @@ const ProjectsNode = ({ onNavigate }) => {
     textDecoration: 'none',
     fontSize: '1.1rem',
     fontWeight: 'bold'
+  };
+
+  // Theme color definitions
+  const themes = {
+    green: {
+      primary: '#00ff88',
+      secondary: '#66ffaa',
+      accent: 'rgba(0, 255, 136, 0.1)',
+      border: 'rgba(0, 255, 136, 0.3)',
+      hoverBorder: 'rgba(0, 255, 136, 0.6)',
+      shadow: 'rgba(0, 255, 136, 0.3)',
+      statusBg: 'rgba(0, 255, 136, 0.2)',
+      statusBorder: 'rgba(0, 255, 136, 0.3)'
+    },
+    blue: {
+      primary: '#00aaff',
+      secondary: '#66ccff',
+      accent: 'rgba(0, 170, 255, 0.1)',
+      border: 'rgba(0, 170, 255, 0.3)',
+      hoverBorder: 'rgba(0, 170, 255, 0.6)',
+      shadow: 'rgba(0, 170, 255, 0.3)',
+      statusBg: 'rgba(0, 170, 255, 0.2)',
+      statusBorder: 'rgba(0, 170, 255, 0.3)'
+    },
+    purple: {
+      primary: '#aa66ff',
+      secondary: '#cc99ff',
+      accent: 'rgba(170, 102, 255, 0.1)',
+      border: 'rgba(170, 102, 255, 0.3)',
+      hoverBorder: 'rgba(170, 102, 255, 0.6)',
+      shadow: 'rgba(170, 102, 255, 0.3)',
+      statusBg: 'rgba(170, 102, 255, 0.2)',
+      statusBorder: 'rgba(170, 102, 255, 0.3)'
+    },
+    cyan: {
+      primary: '#00ffcc',
+      secondary: '#66ffdd',
+      accent: 'rgba(0, 255, 204, 0.1)',
+      border: 'rgba(0, 255, 204, 0.3)',
+      hoverBorder: 'rgba(0, 255, 204, 0.6)',
+      shadow: 'rgba(0, 255, 204, 0.3)',
+      statusBg: 'rgba(0, 255, 204, 0.2)',
+      statusBorder: 'rgba(0, 255, 204, 0.3)'
+    },
+    orange: {
+      primary: '#ff8800',
+      secondary: '#ffaa44',
+      accent: 'rgba(255, 136, 0, 0.1)',
+      border: 'rgba(255, 136, 0, 0.3)',
+      hoverBorder: 'rgba(255, 136, 0, 0.6)',
+      shadow: 'rgba(255, 136, 0, 0.3)',
+      statusBg: 'rgba(255, 136, 0, 0.2)',
+      statusBorder: 'rgba(255, 136, 0, 0.3)'
+    }
+  };
+
+  const getThemeColors = (theme) => themes[theme] || themes.green;
+
+  const handleNavHover = (e, isEntering) => {
+    e.target.style.background = isEntering ? 'rgba(0, 255, 136, 0.2)' : 'rgba(0, 255, 136, 0.1)';
+    e.target.style.boxShadow = isEntering ? '0 5px 15px rgba(0, 255, 136, 0.4)' : 'none';
   };
 
   const projects = [
@@ -233,63 +293,6 @@ const ProjectsNode = ({ onNavigate }) => {
           transition={{ duration: 1, delay: 0.6 }}
         >
           {projects.map((project, index) => {
-            // Define theme colors for each project
-            const getThemeColors = (theme) => {
-              const themes = {
-                green: {
-                  primary: '#00ff88',
-                  secondary: '#66ffaa',
-                  accent: 'rgba(0, 255, 136, 0.1)',
-                  border: 'rgba(0, 255, 136, 0.3)',
-                  hoverBorder: 'rgba(0, 255, 136, 0.6)',
-                  shadow: 'rgba(0, 255, 136, 0.3)',
-                  statusBg: 'rgba(0, 255, 136, 0.2)',
-                  statusBorder: 'rgba(0, 255, 136, 0.3)'
-                },
-                blue: {
-                  primary: '#00aaff',
-                  secondary: '#66ccff',
-                  accent: 'rgba(0, 170, 255, 0.1)',
-                  border: 'rgba(0, 170, 255, 0.3)',
-                  hoverBorder: 'rgba(0, 170, 255, 0.6)',
-                  shadow: 'rgba(0, 170, 255, 0.3)',
-                  statusBg: 'rgba(0, 170, 255, 0.2)',
-                  statusBorder: 'rgba(0, 170, 255, 0.3)'
-                },
-                purple: {
-                  primary: '#aa66ff',
-                  secondary: '#cc99ff',
-                  accent: 'rgba(170, 102, 255, 0.1)',
-                  border: 'rgba(170, 102, 255, 0.3)',
-                  hoverBorder: 'rgba(170, 102, 255, 0.6)',
-                  shadow: 'rgba(170, 102, 255, 0.3)',
-                  statusBg: 'rgba(170, 102, 255, 0.2)',
-                  statusBorder: 'rgba(170, 102, 255, 0.3)'
-                },
-                cyan: {
-                  primary: '#00ffcc',
-                  secondary: '#66ffdd',
-                  accent: 'rgba(0, 255, 204, 0.1)',
-                  border: 'rgba(0, 255, 204, 0.3)',
-                  hoverBorder: 'rgba(0, 255, 204, 0.6)',
-                  shadow: 'rgba(0, 255, 204, 0.3)',
-                  statusBg: 'rgba(0, 255, 204, 0.2)',
-                  statusBorder: 'rgba(0, 255, 204, 0.3)'
-                },
-                orange: {
-                  primary: '#ff8800',
-                  secondary: '#ffaa44',
-                  accent: 'rgba(255, 136, 0, 0.1)',
-                  border: 'rgba(255, 136, 0, 0.3)',
-                  hoverBorder: 'rgba(255, 136, 0, 0.6)',
-                  shadow: 'rgba(255, 136, 0, 0.3)',
-                  statusBg: 'rgba(255, 136, 0, 0.2)',
-                  statusBorder: 'rgba(255, 136, 0, 0.3)'
-                }
-              };
-              return themes[theme] || themes.green;
-            };
-
             const themeColors = getThemeColors(project.theme);
             
             return (
@@ -316,7 +319,11 @@ const ProjectsNode = ({ onNavigate }) => {
                 }}>
                   {project.title}
                 </div>
-                <div style={projectDescStyle}>{project.description}</div>
+                <div style={{
+                  ...projectDescStyle,
+                  color: themeColors.primary,
+                  opacity: 0.9
+                }}>{project.description}</div>
                 <div style={{ 
                   marginTop: '1rem', 
                   fontSize: '0.9rem', 
@@ -363,14 +370,8 @@ const ProjectsNode = ({ onNavigate }) => {
           <div
             style={navBoxStyle}
             onClick={() => onNavigate('techno')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={(e) => handleNavHover(e, true)}
+            onMouseLeave={(e) => handleNavHover(e, false)}
           >
             ↑ My Universe Hub
           </div>
@@ -378,14 +379,8 @@ const ProjectsNode = ({ onNavigate }) => {
           <div
             style={navBoxStyle}
             onClick={() => onNavigate('engineering')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={(e) => handleNavHover(e, true)}
+            onMouseLeave={(e) => handleNavHover(e, false)}
           >
             ← Engineering Cosmos
           </div>
@@ -393,14 +388,8 @@ const ProjectsNode = ({ onNavigate }) => {
           <div
             style={navBoxStyle}
             onClick={() => onNavigate('memories')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={(e) => handleNavHover(e, true)}
+            onMouseLeave={(e) => handleNavHover(e, false)}
           >
             Memory Constellation →
           </div>
