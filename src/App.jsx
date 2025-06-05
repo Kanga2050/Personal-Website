@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import StartNode from './nodes/StartNode';
-import TechnoUniverseNode from './nodes/TechnoUniverseNode';
+import TechnoUniverseDay from './nodes/technouniverse/TechnoUniverseDay';
+import TechnoUniverseNight from './nodes/technouniverse/TechnoUniverseNight';
 import EngineeringNode from './nodes/EngineeringNode';
 import MemoryNode from './nodes/MemoryNode';
 import ProjectsNode from './nodes/ProjectsNode';
@@ -53,6 +54,13 @@ const memoryGraph = {
 const MyUniverse = () => {
   const [currentNode, setCurrentNode] = useState('start');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // Initialize night mode based on current time of day
+  const [isNightMode, setIsNightMode] = useState(() => {
+    const currentHour = new Date().getHours();
+    // Night mode from 6 PM (18:00) to 6 AM (6:00)
+    return currentHour >= 18 || currentHour < 6;
+  });
 
   const navigate = (nodeId) => {
     if (memoryGraph.nodes[nodeId]) {
@@ -65,7 +73,15 @@ const MyUniverse = () => {
   };
 
   const transitionToTechno = () => {
+    // Set night mode based on current time when transitioning from start
+    const currentHour = new Date().getHours();
+    const shouldBeNight = currentHour >= 18 || currentHour < 6;
+    setIsNightMode(shouldBeNight);
     navigate('techno');
+  };
+
+  const toggleTime = () => {
+    setIsNightMode(!isNightMode);
   };
 
   const renderCurrentNode = () => {
@@ -73,7 +89,9 @@ const MyUniverse = () => {
       case 'start':
         return <StartNode onTransition={transitionToTechno} />;
       case 'techno':
-        return <TechnoUniverseNode onNavigate={navigate} />;
+        return isNightMode ? 
+          <TechnoUniverseNight onNavigate={navigate} onToggleTime={toggleTime} /> :
+          <TechnoUniverseDay onNavigate={navigate} onToggleTime={toggleTime} />;
       case 'engineering':
         return <EngineeringNode onNavigate={navigate} />;
       case 'memories':
@@ -111,6 +129,8 @@ const MyUniverse = () => {
           memoryGraph={memoryGraph}
           currentNode={currentNode}
           onNavigate={navigate}
+          isNightMode={isNightMode}
+          onToggleTime={toggleTime}
         />
       )}
       

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const NavigationMenu = ({ memoryGraph, currentNode, onNavigate }) => {
+const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onToggleTime }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [visibleNodes, setVisibleNodes] = useState([]);
 
@@ -55,6 +55,29 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate }) => {
     if (nodeId !== currentNode) {
       onNavigate(nodeId);
       setIsOpen(false);
+    }
+  };
+
+  const handleTechnoYinYangClick = (clickX, position, isCurrent) => {
+    if (isCurrent) {
+      // If we're on the techno node, toggle between day/night
+      onToggleTime();
+    } else {
+      // If navigating to techno, determine day/night based on click position
+      const centerX = position.x;
+      const isLeftSide = clickX < centerX;
+      
+      // Navigate to techno node first
+      onNavigate('techno');
+      setIsOpen(false);
+      
+      // Then set the appropriate mode after a brief delay
+      setTimeout(() => {
+        // Left side (yin/dark) = night mode, Right side (yang/light) = day mode
+        if ((isLeftSide && !isNightMode) || (!isLeftSide && isNightMode)) {
+          onToggleTime();
+        }
+      }, 100);
     }
   };
 
@@ -189,6 +212,107 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate }) => {
                 const isCurrent = node.id === currentNode;
                 const nodeColor = getNodeColor(node.theme);
                 
+                // Special handling for techno node - render as yin-yang
+                if (node.id === 'techno') {
+                  return (
+                    <g key={node.id}>
+                      {/* Define gradient for yin-yang */}
+                      <defs>
+                        <linearGradient id="yinYangGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#8b5cf6" />
+                          <stop offset="50%" stopColor="#ec4899" />
+                          <stop offset="50%" stopColor="#facc15" />
+                          <stop offset="100%" stopColor="#fb923c" />
+                        </linearGradient>
+                      </defs>
+                      
+                      {/* Yin-Yang circle */}
+                      <motion.circle
+                        cx={position.x}
+                        cy={position.y}
+                        r={isCurrent ? 20 : 15}
+                        fill="url(#yinYangGradient)"
+                        stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.5)'}
+                        strokeWidth={isCurrent ? 3 : 2}
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                          const rect = e.target.getBoundingClientRect();
+                          const clickX = e.clientX - rect.left;
+                          const centerX = rect.width / 2;
+                          handleTechnoYinYangClick(clickX, { x: centerX, y: rect.height / 2 }, isCurrent);
+                        }}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                        whileHover={{ scale: isCurrent ? 1 : 1.2, stroke: 'white', strokeWidth: 3 }}
+                        whileTap={{ scale: 0.9 }}
+                      />
+                      
+                      {/* Yin-Yang symbol overlay */}
+                      <motion.g
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: index * 0.1 + 0.1 }}
+                      >
+                        {/* Dark (yin) half */}
+                        <path
+                          d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)} 
+                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 ${position.x} ${position.y}
+                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+                              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}`}
+                          fill="rgba(139, 92, 246, 0.8)"
+                          style={{ pointerEvents: 'none' }}
+                        />
+                        
+                        {/* Small light dot in dark side */}
+                        <circle
+                          cx={position.x}
+                          cy={position.y - (isCurrent ? 10 : 7.5)}
+                          r={(isCurrent ? 4 : 3)}
+                          fill="rgba(251, 191, 36, 0.9)"
+                          style={{ pointerEvents: 'none' }}
+                        />
+                        
+                        {/* Small dark dot in light side */}
+                        <circle
+                          cx={position.x}
+                          cy={position.y + (isCurrent ? 10 : 7.5)}
+                          r={(isCurrent ? 4 : 3)}
+                          fill="rgba(139, 92, 246, 0.9)"
+                          style={{ pointerEvents: 'none' }}
+                        />
+                      </motion.g>
+                      
+                      <motion.text
+                        x={position.x}
+                        y={position.y + 30}
+                        style={nodeTextStyle}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.1 + 0.2 }}
+                      >
+                        {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
+                      </motion.text>
+                      
+                      {/* Add pulsing effect for current node */}
+                      {isCurrent && (
+                        <motion.circle
+                          cx={position.x}
+                          cy={position.y}
+                          r={20}
+                          fill="none"
+                          stroke="url(#yinYangGradient)"
+                          strokeWidth={2}
+                          opacity={0.3}
+                          animate={{ r: [20, 30, 20], opacity: [0.3, 0, 0.3] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        />
+                      )}
+                    </g>
+                  );
+                }
+                
+                // Regular node rendering for non-techno nodes
                 return (
                   <g key={node.id}>
                     <motion.circle

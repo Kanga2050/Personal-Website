@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import AmbientParticles from '../components/AmbientParticles';
 import SceneObject from '../components/SceneObject';
 
-const TechnoUniverseNode = ({ onNavigate }) => {
+const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
   const containerStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #92400e, #b45309, #ea580c)',
+    background: 'linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95)',
     color: 'white',
     display: 'flex',
     alignItems: 'center',
@@ -22,7 +22,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     right: 0,
     bottom: 0,
     opacity: 0.1,
-    backgroundImage: 'linear-gradient(gold 1px, transparent 1px), linear-gradient(90deg, gold 1px, transparent 1px)',
+    backgroundImage: 'linear-gradient(#8b5cf6 1px, transparent 1px), linear-gradient(90deg, #8b5cf6 1px, transparent 1px)',
     backgroundSize: '50px 50px'
   };
 
@@ -44,7 +44,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
   const titleStyle = {
     fontSize: '96px',
     fontWeight: 'bold',
-    background: 'linear-gradient(to right, #facc15, #fbbf24, #fb923c)',
+    background: 'linear-gradient(to right, #8b5cf6, #a78bfa, #c084fc)',
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     color: 'transparent',
@@ -53,17 +53,28 @@ const TechnoUniverseNode = ({ onNavigate }) => {
   };
 
   const subtitleStyle = {
-    color: '#fde047',
+    color: '#c4b5fd',
     fontSize: '20px',
     fontWeight: '300',
     letterSpacing: '0.05em'
+  };
+
+  const moonStyle = {
+    position: 'absolute',
+    top: '20px',
+    left: '20px',
+    fontSize: '80px',
+    color: '#c4b5fd',
+    textShadow: '0 0 20px #8b5cf6',
+    zIndex: 10,
+    cursor: 'pointer'
   };
 
   const dataStreamStyle1 = {
     position: 'absolute',
     left: '40px',
     top: '80px',
-    color: '#facc15',
+    color: '#8b5cf6',
     fontFamily: 'monospace',
     fontSize: '14px',
     opacity: 0.6,
@@ -74,7 +85,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     position: 'absolute',
     right: '64px',
     bottom: '128px',
-    color: '#fbbf24',
+    color: '#a78bfa',
     fontFamily: 'monospace',
     fontSize: '14px',
     opacity: 0.6,
@@ -87,7 +98,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     top: '25%',
     width: '32px',
     height: '32px',
-    border: '2px solid #facc15',
+    border: '2px solid #8b5cf6',
     opacity: 0.3
   };
 
@@ -97,7 +108,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     bottom: '33.333333%',
     width: '24px',
     height: '24px',
-    backgroundColor: '#fbbf24',
+    backgroundColor: '#a78bfa',
     opacity: 0.4,
     transform: 'rotate(45deg)'
   };
@@ -108,7 +119,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     left: '50%',
     transform: 'translateX(-50%)',
     textAlign: 'center',
-    color: 'rgba(253, 224, 71, 0.7)',
+    color: 'rgba(196, 181, 253, 0.7)',
     fontFamily: 'monospace'
   };
 
@@ -119,7 +130,7 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     right: 0,
     bottom: 0,
     pointerEvents: 'none',
-    background: 'linear-gradient(transparent 48%, rgba(255,215,0,0.03) 49%, rgba(255,215,0,0.03) 51%, transparent 52%)',
+    background: 'linear-gradient(transparent 48%, rgba(139,92,246,0.03) 49%, rgba(139,92,246,0.03) 51%, transparent 52%)',
     backgroundSize: '100% 4px'
   };
 
@@ -132,6 +143,24 @@ const TechnoUniverseNode = ({ onNavigate }) => {
     >
       <AmbientParticles />
       <div style={gridOverlayStyle} />
+      
+      {/* Moon in top left */}
+      <motion.div
+        style={moonStyle}
+        initial={{ scale: 0, rotate: 0 }}
+        animate={{ scale: 1, rotate: 15 }}
+        transition={{ duration: 2, ease: "easeOut" }}
+        onClick={onToggleTime}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+      >
+        <motion.div
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        >
+          🌙
+        </motion.div>
+      </motion.div>
       
       <div style={sceneContainerStyle}>
         <motion.div
@@ -247,4 +276,4 @@ const TechnoUniverseNode = ({ onNavigate }) => {
   );
 };
 
-export default TechnoUniverseNode;
+export default TechnoUniverseNight;
