@@ -153,26 +153,35 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate }) => {
             
             <svg style={svgStyle}>
               {/* Render edges first */}
-              {visibleNodes.map((node, index) => {
-                if (node.id === currentNode) return null;
-                
-                const currentPos = getNodePosition(currentNode, 0, visibleNodes.length);
-                const nodePos = getNodePosition(node.id, index, visibleNodes.length);
-                
-                return (
-                  <motion.line
-                    key={`edge-${node.id}`}
-                    x1={currentPos.x}
-                    y1={currentPos.y}
-                    x2={nodePos.x}
-                    y2={nodePos.y}
-                    style={edgeStyle}
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-                  />
-                );
-              })}
+              {visibleNodes.map((nodeA, indexA) => {
+                return visibleNodes.map((nodeB, indexB) => {
+                  // Skip if same node or if we've already rendered this edge
+                  if (indexA >= indexB) return null;
+                  
+                  // Check if there's an edge between nodeA and nodeB in either direction
+                  const hasEdgeAB = memoryGraph.edges[nodeA.id]?.includes(nodeB.id);
+                  const hasEdgeBA = memoryGraph.edges[nodeB.id]?.includes(nodeA.id);
+                  
+                  if (!hasEdgeAB && !hasEdgeBA) return null;
+                  
+                  const posA = getNodePosition(nodeA.id, indexA, visibleNodes.length);
+                  const posB = getNodePosition(nodeB.id, indexB, visibleNodes.length);
+                  
+                  return (
+                    <motion.line
+                      key={`edge-${nodeA.id}-${nodeB.id}`}
+                      x1={posA.x}
+                      y1={posA.y}
+                      x2={posB.x}
+                      y2={posB.y}
+                      style={edgeStyle}
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ delay: 0.3 + (indexA + indexB) * 0.05, duration: 0.5 }}
+                    />
+                  );
+                });
+              }).flat().filter(Boolean)}
               
               {/* Render nodes */}
               {visibleNodes.map((node, index) => {
