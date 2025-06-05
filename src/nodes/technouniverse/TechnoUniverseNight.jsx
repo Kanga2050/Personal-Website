@@ -268,7 +268,6 @@ const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
         >
-          <p style={{ fontSize: '14px' }}>INTERACTIVE_MODE: ENABLED</p>
           <p style={{ fontSize: '12px', marginTop: '4px' }}>Hover over objects to reveal their secrets</p>
         </motion.div>
       </div>

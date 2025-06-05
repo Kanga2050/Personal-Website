@@ -30,10 +30,17 @@ The application is now running at **http://localhost:3001** with full modular ar
 - **Expected**: Green-themed projects showcase with grid layout
 - **Navigation**: Can reach from multiple paths
 
-#### 5. **Graph-Based Navigation**
+#### 5. **Graph-Based Navigation with Universal Hover Effects**
 - **Test**: Open navigation menu and observe node connections
 - **Expected**: Current node in center, adjacent nodes in circle, animated edges
-- **Interaction**: Click any node to navigate, see hover effects
+- **ENHANCED HOVER FEATURE**: 
+  - Hover over ANY node (including current) → Halo appears in node's theme color
+  - **Current node**: Shows larger halo (1.2x scale) in its own theme color
+  - **Adjacent nodes**: Shows halo (1.4x scale) in destination theme color
+  - **Yin-yang techno node**: Works for both current and adjacent states:
+    - Left side (yin/dark) → Purple halo (night mode preview)
+    - Right side (yang/light) → Yellow halo (day mode preview)
+- **Interaction**: Click any node to navigate, click current node sides for mode switching
 
 #### 6. **Modular Architecture**
 - **Structure**: All components properly organized in `/src/nodes/` and `/src/components/`
@@ -56,7 +63,13 @@ The application is now running at **http://localhost:3001** with full modular ar
 - **Yin-Yang Symbol**: Purple/pink to yellow/orange gradient with interactive zones
 - **Icon Sizing**: Increased from 60px to 80px for better accessibility
 - **Animation System**: Smooth transitions and hover effects throughout
-- **Graph Visualization**: Real-time navigation graph with current node highlighting
+- **Graph Visualization**: Clean navigation graph with current node highlighting
+- **NEW: Universal Hover Halos**: All nodes show destination-themed color previews
+  - Current nodes show self-themed halos (larger scale for distinction)
+  - Adjacent nodes show destination-themed halos  
+  - Yin-yang techno node shows purple (night) or yellow (day) based on hover side
+  - Simplified interaction: all nodes are clickable regardless of current state
+- **Minimalist Interface**: Clean design with reduced text clutter
 - **Responsive Design**: Proper layout adaptation across different screen sizes
 
 ### 🚀 Application Status

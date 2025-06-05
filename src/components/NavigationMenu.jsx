@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onToggleTime }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [visibleNodes, setVisibleNodes] = useState([]);
+  const [hoveredNode, setHoveredNode] = useState(null);
+  const [yinYangHoverSide, setYinYangHoverSide] = useState(null); // 'yin' or 'yang'
 
   useEffect(() => {
     // Get current node and its adjacent nodes
@@ -49,6 +51,25 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
       default:
         return '#6b7280';
     }
+  };
+
+  const getHoverHaloColor = (nodeId) => {
+    if (nodeId === 'techno') {
+      // For techno node, return different colors based on hover side
+      if (yinYangHoverSide === 'yin') {
+        // Night mode colors - purple/dark
+        return '#8b5cf6';
+      } else if (yinYangHoverSide === 'yang') {
+        // Day mode colors - yellow/light
+        return '#facc15';
+      }
+      // Default techno color when no specific side is hovered
+      return '#facc15';
+    }
+    
+    // For regular nodes, use their theme color
+    const node = memoryGraph.nodes[nodeId];
+    return node ? getNodeColor(node.theme) : '#6b7280';
   };
 
   const handleNodeClick = (nodeId) => {
@@ -125,11 +146,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
     cursor: 'pointer'
   };
 
-  const currentNodeStyle = {
-    ...nodeStyle,
-    cursor: 'default'
-  };
-
   const edgeStyle = {
     stroke: 'rgba(255, 255, 255, 0.3)',
     strokeWidth: 2
@@ -170,9 +186,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
             exit={{ opacity: 0, scale: 0.8, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div style={{ color: 'white', fontSize: '14px', marginBottom: '10px', textAlign: 'center' }}>
-              Navigation Graph
-            </div>
             
             <svg style={svgStyle}>
               {/* Render edges first */}
@@ -226,6 +239,67 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                         </linearGradient>
                       </defs>
                       
+                      {/* Invisible hover zones for yin-yang sides */}
+                      {/* Left side (Yin) hover zone */}
+                      <motion.path
+                        d={`M ${position.x - (isCurrent ? 20 : 15)} ${position.y}
+                            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+                            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+                            Z`}
+                        fill="transparent"
+                        style={{ cursor: 'pointer' }}
+                        onMouseEnter={() => {
+                          setHoveredNode(node.id);
+                          setYinYangHoverSide('yin');
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredNode(null);
+                          setYinYangHoverSide(null);
+                        }}
+                        onClick={(e) => {
+                          if (isCurrent) {
+                            // If current node, toggle to night mode
+                            if (!isNightMode) onToggleTime();
+                          } else {
+                            // If not current, navigate and set to night mode
+                            const rect = e.target.getBoundingClientRect();
+                            const clickX = e.clientX - rect.left;
+                            const centerX = rect.width / 2;
+                            handleTechnoYinYangClick(clickX, { x: centerX, y: rect.height / 2 }, isCurrent);
+                          }
+                        }}
+                      />
+                      
+                      {/* Right side (Yang) hover zone */}
+                      <motion.path
+                        d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+                            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x + (isCurrent ? 20 : 15)} ${position.y}
+                            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+                            Z`}
+                        fill="transparent"
+                        style={{ cursor: 'pointer' }}
+                        onMouseEnter={() => {
+                          setHoveredNode(node.id);
+                          setYinYangHoverSide('yang');
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredNode(null);
+                          setYinYangHoverSide(null);
+                        }}
+                        onClick={(e) => {
+                          if (isCurrent) {
+                            // If current node, toggle to day mode  
+                            if (isNightMode) onToggleTime();
+                          } else {
+                            // If not current, navigate and set to day mode
+                            const rect = e.target.getBoundingClientRect();
+                            const clickX = e.clientX - rect.left;
+                            const centerX = rect.width / 2;
+                            handleTechnoYinYangClick(clickX, { x: centerX, y: rect.height / 2 }, isCurrent);
+                          }
+                        }}
+                      />
+                      
                       {/* Yin-Yang circle */}
                       <motion.circle
                         cx={position.x}
@@ -234,18 +308,10 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                         fill="url(#yinYangGradient)"
                         stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.5)'}
                         strokeWidth={isCurrent ? 3 : 2}
-                        style={{ cursor: 'pointer' }}
-                        onClick={(e) => {
-                          const rect = e.target.getBoundingClientRect();
-                          const clickX = e.clientX - rect.left;
-                          const centerX = rect.width / 2;
-                          handleTechnoYinYangClick(clickX, { x: centerX, y: rect.height / 2 }, isCurrent);
-                        }}
+                        style={{ pointerEvents: 'none' }}
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: index * 0.1 }}
-                        whileHover={{ scale: isCurrent ? 1 : 1.2, stroke: 'white', strokeWidth: 3 }}
-                        whileTap={{ scale: 0.9 }}
                       />
                       
                       {/* Yin-Yang symbol overlay */}
@@ -253,6 +319,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
                         transition={{ delay: index * 0.1 + 0.1 }}
+                        style={{ pointerEvents: 'none' }}
                       >
                         {/* Dark (yin) half */}
                         <path
@@ -261,7 +328,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                               A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
                               A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}`}
                           fill="rgba(139, 92, 246, 0.8)"
-                          style={{ pointerEvents: 'none' }}
                         />
                         
                         {/* Small light dot in dark side */}
@@ -270,7 +336,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                           cy={position.y - (isCurrent ? 10 : 7.5)}
                           r={(isCurrent ? 4 : 3)}
                           fill="rgba(251, 191, 36, 0.9)"
-                          style={{ pointerEvents: 'none' }}
                         />
                         
                         {/* Small dark dot in light side */}
@@ -279,7 +344,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                           cy={position.y + (isCurrent ? 10 : 7.5)}
                           r={(isCurrent ? 4 : 3)}
                           fill="rgba(139, 92, 246, 0.9)"
-                          style={{ pointerEvents: 'none' }}
                         />
                       </motion.g>
                       
@@ -293,6 +357,22 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                       >
                         {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
                       </motion.text>
+                      
+                      {/* Add hover halo effect */}
+                      {hoveredNode === node.id && (
+                        <motion.circle
+                          cx={position.x}
+                          cy={position.y}
+                          r={isCurrent ? 20 : 15}
+                          fill="none"
+                          stroke={getHoverHaloColor(node.id)}
+                          strokeWidth={3}
+                          opacity={0.8}
+                          initial={{ scale: 1, opacity: 0 }}
+                          animate={{ scale: isCurrent ? 1.2 : 1.4, opacity: 0.8 }}
+                          transition={{ duration: 0.2 }}
+                        />
+                      )}
                       
                       {/* Add pulsing effect for current node */}
                       {isCurrent && (
@@ -322,13 +402,14 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                       fill={nodeColor}
                       stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.5)'}
                       strokeWidth={isCurrent ? 3 : 2}
-                      style={isCurrent ? currentNodeStyle : nodeStyle}
+                      style={nodeStyle}
                       onClick={() => handleNodeClick(node.id)}
+                      onMouseEnter={() => setHoveredNode(node.id)}
+                      onMouseLeave={() => setHoveredNode(null)}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
                       transition={{ delay: index * 0.1 }}
-                      whileHover={!isCurrent ? { scale: 1.2, stroke: 'white', strokeWidth: 3 } : {}}
-                      whileTap={!isCurrent ? { scale: 0.9 } : {}}
+                      whileTap={{ scale: 0.9 }}
                     />
                     <motion.text
                       x={position.x}
@@ -341,6 +422,23 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                     >
                       {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
                     </motion.text>
+                    
+                    {/* Add hover halo effect showing destination color */}
+                    {hoveredNode === node.id && (
+                      <motion.circle
+                        cx={position.x}
+                        cy={position.y}
+                        r={isCurrent ? 20 : 15}
+                        fill="none"
+                        stroke={getHoverHaloColor(node.id)}
+                        strokeWidth={3}
+                        opacity={0.8}
+                        initial={{ scale: 1, opacity: 0 }}
+                        animate={{ scale: isCurrent ? 1.2 : 1.4, opacity: 0.8 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
+                    
                     {/* Add pulsing effect for current node */}
                     {isCurrent && (
                       <motion.circle
@@ -360,17 +458,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
               })}
             </svg>
             
-            <div style={{ 
-              position: 'absolute', 
-              bottom: '10px', 
-              left: '20px', 
-              right: '20px', 
-              fontSize: '10px', 
-              color: 'rgba(255, 255, 255, 0.6)',
-              textAlign: 'center'
-            }}>
-              Current: {memoryGraph.nodes[currentNode]?.title}
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
