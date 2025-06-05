@@ -48,6 +48,14 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
         return '#8b5cf6';
       case 'green':
         return '#66ff66';
+      case 'blue':
+        return '#00aaff';
+      case 'purple':
+        return '#aa66ff';
+      case 'cyan':
+        return '#00ffcc';
+      case 'orange':
+        return '#ff8800';
       default:
         return '#6b7280';
     }

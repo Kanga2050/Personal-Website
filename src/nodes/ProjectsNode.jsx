@@ -8,6 +8,17 @@ const ProjectsNode = ({ onNavigate }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    // Add CSS animation for gradient shift
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+    `;
+    document.head.appendChild(style);
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -21,13 +32,16 @@ const ProjectsNode = ({ onNavigate }) => {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      document.head.removeChild(style);
+    };
   }, []);
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #0f4f0f 0%, #003300 50%, #001a00 100%)',
-    color: '#66ff66',
+    background: 'linear-gradient(135deg, #0d3818 0%, #001a0d 50%, #000a05 100%)',
+    color: '#00ff88',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -50,18 +64,22 @@ const ProjectsNode = ({ onNavigate }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #66ff66',
-    background: 'linear-gradient(45deg, #66ff66, #99ff99, #66ff66)',
+    textShadow: '0 0 30px #00ff88, 0 0 60px #00ff88',
+    background: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88, #99ffcc)',
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    WebkitTextFillColor: 'transparent',
+    backgroundSize: '200% 200%',
+    animation: 'gradient-shift 3s ease-in-out infinite'
   };
 
   const subtitleStyle = {
-    fontSize: '1.2rem',
+    fontSize: '1.3rem',
     marginBottom: '3rem',
     textAlign: 'center',
-    opacity: 0.8
+    color: '#66ffaa',
+    opacity: 0.9,
+    textShadow: '0 0 10px rgba(102, 255, 170, 0.5)'
   };
 
   const projectsGridStyle = {
@@ -104,10 +122,10 @@ const ProjectsNode = ({ onNavigate }) => {
 
   const navBoxStyle = {
     padding: '1rem 2rem',
-    border: '2px solid rgba(102, 255, 102, 0.5)',
+    border: '2px solid rgba(0, 255, 136, 0.5)',
     borderRadius: '12px',
-    background: 'rgba(102, 255, 102, 0.1)',
-    color: '#66ff66',
+    background: 'rgba(0, 255, 136, 0.1)',
+    color: '#00ff88',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textDecoration: 'none',
@@ -117,34 +135,44 @@ const ProjectsNode = ({ onNavigate }) => {
 
   const projects = [
     {
-      title: 'AI Code Assistant',
-      description: 'An intelligent coding companion built with machine learning to help developers write better code faster.',
-      tech: 'Python, TensorFlow, React'
+      id: 'five-axis-printer',
+      title: '5-Axis 3D Printer',
+      description: 'Revolutionary multi-axis additive manufacturing system capable of producing complex geometries without support structures.',
+      tech: 'Precision Engineering, Advanced Materials, Control Systems',
+      status: 'Development',
+      theme: 'green'
     },
     {
-      title: 'Memory Palace App',
-      description: 'A digital memory palace application using 3D visualization to help users memorize information effectively.',
-      tech: 'Three.js, WebGL, Node.js'
+      id: 'underwater-probe',
+      title: 'Underwater Probe',
+      description: 'Deep-sea exploration vehicle with advanced sensor arrays for marine research and environmental monitoring.',
+      tech: 'Pressure Systems, Sonar, Marine Electronics',
+      status: 'Testing',
+      theme: 'blue'
     },
     {
-      title: 'Quantum Simulator',
-      description: 'A quantum computing simulator that visualizes quantum states and operations in an intuitive interface.',
-      tech: 'JavaScript, D3.js, WebAssembly'
+      id: 'piezo-microscope',
+      title: 'Piezoelectric Electron Microscope',
+      description: 'Ultra-high resolution imaging system using piezoelectric positioning for nanoscale precision and stability.',
+      tech: 'Electron Optics, Piezoelectric Systems, Image Processing',
+      status: 'Prototype',
+      theme: 'purple'
     },
     {
-      title: 'Neural Art Generator',
-      description: 'An artistic tool that uses neural networks to generate unique digital artwork from text prompts.',
-      tech: 'PyTorch, FastAPI, React'
+      id: 'personal-submarine',
+      title: 'Personal Submarine',
+      description: 'Compact underwater exploration vessel designed for recreational diving and marine observation.',
+      tech: 'Submersible Design, Life Support, Navigation',
+      status: 'Concept',
+      theme: 'cyan'
     },
     {
-      title: 'Distributed Database',
-      description: 'A high-performance distributed database system designed for real-time applications.',
-      tech: 'Go, gRPC, Docker'
-    },
-    {
-      title: 'Virtual Reality Lab',
-      description: 'An immersive VR environment for conducting scientific experiments in virtual space.',
-      tech: 'Unity, C#, OpenXR'
+      id: 'smaller-projects',
+      title: 'Smaller Projects Collection',
+      description: 'A diverse portfolio of experimental projects including smart materials, sensor networks, and automation systems.',
+      tech: 'IoT, Materials Science, Automation',
+      status: 'Various',
+      theme: 'orange'
     }
   ];
 
@@ -163,14 +191,14 @@ const ProjectsNode = ({ onNavigate }) => {
       
       <ParticleSystem 
         canvasRef={canvasRef}
-        particleColor="#66ff66"
+        particleColor="#00ff88"
         particleCount={150}
         speed={0.8}
       />
       
       <AmbientParticles 
         canvasRef={canvasRef}
-        color="#66ff66"
+        color="#00ff88"
         opacity={0.4}
       />
 
@@ -204,31 +232,126 @@ const ProjectsNode = ({ onNavigate }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.6 }}
         >
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              style={projectCardStyle}
-              whileHover={{ 
-                scale: 1.05,
-                boxShadow: '0 10px 30px rgba(102, 255, 102, 0.3)',
-                borderColor: 'rgba(102, 255, 102, 0.6)'
-              }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-            >
-              <div style={projectTitleStyle}>{project.title}</div>
-              <div style={projectDescStyle}>{project.description}</div>
-              <div style={{ 
-                marginTop: '1rem', 
-                fontSize: '0.9rem', 
-                color: '#99ff99',
-                fontStyle: 'italic'
-              }}>
-                {project.tech}
-              </div>
-            </motion.div>
-          ))}
+          {projects.map((project, index) => {
+            // Define theme colors for each project
+            const getThemeColors = (theme) => {
+              const themes = {
+                green: {
+                  primary: '#00ff88',
+                  secondary: '#66ffaa',
+                  accent: 'rgba(0, 255, 136, 0.1)',
+                  border: 'rgba(0, 255, 136, 0.3)',
+                  hoverBorder: 'rgba(0, 255, 136, 0.6)',
+                  shadow: 'rgba(0, 255, 136, 0.3)',
+                  statusBg: 'rgba(0, 255, 136, 0.2)',
+                  statusBorder: 'rgba(0, 255, 136, 0.3)'
+                },
+                blue: {
+                  primary: '#00aaff',
+                  secondary: '#66ccff',
+                  accent: 'rgba(0, 170, 255, 0.1)',
+                  border: 'rgba(0, 170, 255, 0.3)',
+                  hoverBorder: 'rgba(0, 170, 255, 0.6)',
+                  shadow: 'rgba(0, 170, 255, 0.3)',
+                  statusBg: 'rgba(0, 170, 255, 0.2)',
+                  statusBorder: 'rgba(0, 170, 255, 0.3)'
+                },
+                purple: {
+                  primary: '#aa66ff',
+                  secondary: '#cc99ff',
+                  accent: 'rgba(170, 102, 255, 0.1)',
+                  border: 'rgba(170, 102, 255, 0.3)',
+                  hoverBorder: 'rgba(170, 102, 255, 0.6)',
+                  shadow: 'rgba(170, 102, 255, 0.3)',
+                  statusBg: 'rgba(170, 102, 255, 0.2)',
+                  statusBorder: 'rgba(170, 102, 255, 0.3)'
+                },
+                cyan: {
+                  primary: '#00ffcc',
+                  secondary: '#66ffdd',
+                  accent: 'rgba(0, 255, 204, 0.1)',
+                  border: 'rgba(0, 255, 204, 0.3)',
+                  hoverBorder: 'rgba(0, 255, 204, 0.6)',
+                  shadow: 'rgba(0, 255, 204, 0.3)',
+                  statusBg: 'rgba(0, 255, 204, 0.2)',
+                  statusBorder: 'rgba(0, 255, 204, 0.3)'
+                },
+                orange: {
+                  primary: '#ff8800',
+                  secondary: '#ffaa44',
+                  accent: 'rgba(255, 136, 0, 0.1)',
+                  border: 'rgba(255, 136, 0, 0.3)',
+                  hoverBorder: 'rgba(255, 136, 0, 0.6)',
+                  shadow: 'rgba(255, 136, 0, 0.3)',
+                  statusBg: 'rgba(255, 136, 0, 0.2)',
+                  statusBorder: 'rgba(255, 136, 0, 0.3)'
+                }
+              };
+              return themes[theme] || themes.green;
+            };
+
+            const themeColors = getThemeColors(project.theme);
+            
+            return (
+              <motion.div
+                key={index}
+                style={{
+                  ...projectCardStyle,
+                  background: themeColors.accent,
+                  border: `1px solid ${themeColors.border}`,
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: `0 10px 30px ${themeColors.shadow}`,
+                  borderColor: themeColors.hoverBorder
+                }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
+                onClick={() => onNavigate(project.id)}
+              >
+                <div style={{
+                  ...projectTitleStyle,
+                  color: themeColors.secondary
+                }}>
+                  {project.title}
+                </div>
+                <div style={projectDescStyle}>{project.description}</div>
+                <div style={{ 
+                  marginTop: '1rem', 
+                  fontSize: '0.9rem', 
+                  color: themeColors.secondary,
+                  fontStyle: 'italic'
+                }}>
+                  {project.tech}
+                </div>
+                <div style={{
+                  marginTop: '1rem',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{
+                    fontSize: '0.8rem',
+                    color: themeColors.primary,
+                    background: themeColors.statusBg,
+                    padding: '0.3rem 0.8rem',
+                    borderRadius: '15px',
+                    border: `1px solid ${themeColors.statusBorder}`
+                  }}>
+                    {project.status}
+                  </div>
+                  <div style={{
+                    fontSize: '0.9rem',
+                    color: themeColors.secondary,
+                    fontWeight: 'bold'
+                  }}>
+                    Click to explore →
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         <motion.div 
@@ -241,11 +364,11 @@ const ProjectsNode = ({ onNavigate }) => {
             style={navBoxStyle}
             onClick={() => onNavigate('techno')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(102, 255, 102, 0.4)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.1)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
@@ -256,11 +379,11 @@ const ProjectsNode = ({ onNavigate }) => {
             style={navBoxStyle}
             onClick={() => onNavigate('engineering')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(102, 255, 102, 0.4)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.1)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
@@ -271,11 +394,11 @@ const ProjectsNode = ({ onNavigate }) => {
             style={navBoxStyle}
             onClick={() => onNavigate('memories')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(102, 255, 102, 0.4)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(102, 255, 102, 0.1)';
+              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
@@ -288,7 +411,7 @@ const ProjectsNode = ({ onNavigate }) => {
         x={window.innerWidth * 0.15}
         y={window.innerHeight * 0.3}
         size={60}
-        color="#66ff66"
+        color="#00ff88"
         shape="diamond"
         rotationSpeed={1}
         canvasRef={canvasRef}
@@ -298,7 +421,7 @@ const ProjectsNode = ({ onNavigate }) => {
         x={window.innerWidth * 0.85}
         y={window.innerHeight * 0.7}
         size={40}
-        color="#99ff99"
+        color="#66ffaa"
         shape="triangle"
         rotationSpeed={-0.8}
         canvasRef={canvasRef}

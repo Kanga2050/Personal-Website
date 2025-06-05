@@ -7,6 +7,11 @@ import EngineeringNode from './nodes/EngineeringNode';
 import MemoryNode from './nodes/MemoryNode';
 import ProjectsNode from './nodes/ProjectsNode';
 import NavigationMenu from './components/NavigationMenu';
+import FiveAxisPrinter from './nodes/projects/FiveAxisPrinter';
+import UnderwaterProbe from './nodes/projects/UnderwaterProbe';
+import PiezoMicroscope from './nodes/projects/PiezoMicroscope';
+import PersonalSubmarine from './nodes/projects/PersonalSubmarine';
+import SmallerProjects from './nodes/projects/SmallerProjects';
 
 const memoryGraph = {
   nodes: {
@@ -39,6 +44,36 @@ const memoryGraph = {
       title: 'My Projects',
       theme: 'green',
       content: 'A collection of creative endeavors and technical achievements...'
+    },
+    'five-axis-printer': {
+      id: 'five-axis-printer',
+      title: '5-Axis 3D Printer',
+      theme: 'green',
+      content: 'Revolutionary multi-axis additive manufacturing system'
+    },
+    'underwater-probe': {
+      id: 'underwater-probe',
+      title: 'Underwater Probe',
+      theme: 'blue',
+      content: 'Deep-sea exploration vehicle with advanced sensor arrays'
+    },
+    'piezo-microscope': {
+      id: 'piezo-microscope',
+      title: 'Piezoelectric Electron Microscope',
+      theme: 'purple',
+      content: 'Ultra-high resolution imaging system using piezoelectric positioning'
+    },
+    'personal-submarine': {
+      id: 'personal-submarine',
+      title: 'Personal Submarine',
+      theme: 'cyan',
+      content: 'Compact underwater exploration vessel for recreational diving'
+    },
+    'smaller-projects': {
+      id: 'smaller-projects',
+      title: 'Smaller Projects Collection',
+      theme: 'orange',
+      content: 'Diverse portfolio of experimental projects and innovations'
     }
   },
   edges: {
@@ -46,7 +81,12 @@ const memoryGraph = {
     techno: ['engineering', 'memories', 'projects'],
     engineering: ['techno', 'projects'],
     memories: ['techno', 'projects'],
-    projects: ['techno', 'engineering', 'memories']
+    projects: ['techno', 'engineering', 'memories', 'five-axis-printer', 'underwater-probe', 'piezo-microscope', 'personal-submarine', 'smaller-projects'],
+    'five-axis-printer': ['projects'],
+    'underwater-probe': ['projects'],
+    'piezo-microscope': ['projects'],
+    'personal-submarine': ['projects'],
+    'smaller-projects': ['projects']
   }
 };
 
@@ -98,6 +138,16 @@ const MyUniverse = () => {
         return <MemoryNode onNavigate={navigate} />;
       case 'projects':
         return <ProjectsNode onNavigate={navigate} />;
+      case 'five-axis-printer':
+        return <FiveAxisPrinter onNavigate={navigate} />;
+      case 'underwater-probe':
+        return <UnderwaterProbe onNavigate={navigate} />;
+      case 'piezo-microscope':
+        return <PiezoMicroscope onNavigate={navigate} />;
+      case 'personal-submarine':
+        return <PersonalSubmarine onNavigate={navigate} />;
+      case 'smaller-projects':
+        return <SmallerProjects onNavigate={navigate} />;
       default:
         return <StartNode onTransition={transitionToTechno} />;
     }
