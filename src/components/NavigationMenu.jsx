@@ -229,13 +229,18 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                 if (node.id === 'techno') {
                   return (
                     <g key={node.id}>
-                      {/* Define gradient for yin-yang */}
+                      {/* Define gradients for yin-yang */}
                       <defs>
-                        <linearGradient id="yinYangGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        {/* Yang (light/day) gradient - yellow to orange */}
+                        <linearGradient id="yangGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stopColor="#fbbf24" />
+                          <stop offset="100%" stopColor="#f59e0b" />
+                        </linearGradient>
+                        
+                        {/* Yin (dark/night) gradient - purple to pink */}
+                        <linearGradient id="yinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                           <stop offset="0%" stopColor="#8b5cf6" />
-                          <stop offset="50%" stopColor="#ec4899" />
-                          <stop offset="50%" stopColor="#facc15" />
-                          <stop offset="100%" stopColor="#fb923c" />
+                          <stop offset="100%" stopColor="#ec4899" />
                         </linearGradient>
                       </defs>
                       
@@ -300,50 +305,47 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                         }}
                       />
                       
-                      {/* Yin-Yang circle */}
-                      <motion.circle
-                        cx={position.x}
-                        cy={position.y}
-                        r={isCurrent ? 20 : 15}
-                        fill="url(#yinYangGradient)"
-                        stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.5)'}
-                        strokeWidth={isCurrent ? 3 : 2}
-                        style={{ pointerEvents: 'none' }}
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                      />
-                      
-                      {/* Yin-Yang symbol overlay */}
+                      {/* Yin-Yang design */}
                       <motion.g
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        transition={{ delay: index * 0.1 + 0.1 }}
+                        transition={{ delay: index * 0.1 }}
                         style={{ pointerEvents: 'none' }}
                       >
-                        {/* Dark (yin) half */}
-                        <path
-                          d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)} 
-                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 ${position.x} ${position.y}
-                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
-                              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}`}
-                          fill="rgba(139, 92, 246, 0.8)"
+                        {/* Yang (light) background circle */}
+                        <circle
+                          cx={position.x}
+                          cy={position.y}
+                          r={isCurrent ? 20 : 15}
+                          fill="url(#yangGradient)"
+                          stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.3)'}
+                          strokeWidth={isCurrent ? 1.5 : 1}
                         />
                         
-                        {/* Small light dot in dark side */}
+                        {/* Yin (dark) half - teardrop shape */}
+                        <path
+                          d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+                              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 0 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 ${position.x} ${position.y}
+                              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+                              Z`}
+                          fill="url(#yinGradient)"
+                        />
+                        
+                        {/* Small yin (dark) circle in yang side */}
                         <circle
                           cx={position.x}
                           cy={position.y - (isCurrent ? 10 : 7.5)}
                           r={(isCurrent ? 4 : 3)}
-                          fill="rgba(251, 191, 36, 0.9)"
+                          fill="url(#yinGradient)"
                         />
                         
-                        {/* Small dark dot in light side */}
+                        {/* Small yang (light) circle in yin side */}
                         <circle
                           cx={position.x}
                           cy={position.y + (isCurrent ? 10 : 7.5)}
                           r={(isCurrent ? 4 : 3)}
-                          fill="rgba(139, 92, 246, 0.9)"
+                          fill="url(#yangGradient)"
                         />
                       </motion.g>
                       
@@ -381,7 +383,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                           cy={position.y}
                           r={20}
                           fill="none"
-                          stroke="url(#yinYangGradient)"
+                          stroke="rgba(255, 255, 255, 0.6)"
                           strokeWidth={2}
                           opacity={0.3}
                           animate={{ r: [20, 30, 20], opacity: [0.3, 0, 0.3] }}
