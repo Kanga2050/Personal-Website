@@ -149,11 +149,8 @@ const MyUniverse = () => {
   const navigate = (nodeId) => {
     // Check if we're navigating within current graph level
     if (currentGraphLevel.nodes[nodeId]) {
-      setIsTransitioning(true);
-      setTimeout(() => {
-        setCurrentNode(nodeId);
-        setIsTransitioning(false);
-      }, 300);
+      // Direct navigation without transition screen for smoother menu experience
+      setCurrentNode(nodeId);
     }
   };
 

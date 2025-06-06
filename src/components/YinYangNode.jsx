@@ -27,7 +27,7 @@ const YinYangNode = ({
       
       // Navigate to node first
       onNavigate(node.id);
-      onClose();
+      // Keep menu open for continued navigation
       
       // Then set the appropriate mode after a brief delay
       setTimeout(() => {
@@ -88,6 +88,7 @@ const YinYangNode = ({
         onMouseEnter={() => onHover(node.id, 'yin')}
         onMouseLeave={() => onHoverEnd()}
         onClick={(e) => {
+          e.stopPropagation(); // Prevent background click
           if (isCurrent) {
             // If current node, toggle to night mode
             if (!isNightMode) onToggleTime();
@@ -98,6 +99,13 @@ const YinYangNode = ({
             handleYinYangClick(clickX, isCurrent);
           }
         }}
+        animate={{
+          d: `M ${position.x - (isCurrent ? 20 : 15)} ${position.y}
+              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+              Z`
+        }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
       />
       
       {/* Right side (Yang) hover zone */}
@@ -111,6 +119,7 @@ const YinYangNode = ({
         onMouseEnter={() => onHover(node.id, 'yang')}
         onMouseLeave={() => onHoverEnd()}
         onClick={(e) => {
+          e.stopPropagation(); // Prevent background click
           if (isCurrent) {
             // If current node, toggle to day mode  
             if (isNightMode) onToggleTime();
@@ -121,19 +130,34 @@ const YinYangNode = ({
             handleYinYangClick(clickX, isCurrent);
           }
         }}
+        animate={{
+          d: `M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x + (isCurrent ? 20 : 15)} ${position.y}
+              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+              Z`
+        }}
+        transition={{ duration: 0.6, ease: "easeInOut" }}
       />
       
       {/* Yin-Yang design */}
       <motion.g
         initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: index * 0.1 }}
+        animate={{ 
+          scale: 1,
+          x: position.x,
+          y: position.y
+        }}
+        transition={{ 
+          scale: { delay: index * 0.1 },
+          x: { duration: 0.6, ease: "easeInOut" },
+          y: { duration: 0.6, ease: "easeInOut" }
+        }}
         style={{ pointerEvents: 'none' }}
       >
         {/* Yang (light) background circle */}
         <circle
-          cx={position.x}
-          cy={position.y}
+          cx={0}
+          cy={0}
           r={isCurrent ? 20 : 15}
           fill={`url(#yangGradient-${node.id})`}
           stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.3)'}
@@ -142,26 +166,26 @@ const YinYangNode = ({
         
         {/* Yin (dark) half - teardrop shape */}
         <path
-          d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 0 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
-              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 ${position.x} ${position.y}
-              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
+          d={`M 0 ${-(isCurrent ? 20 : 15)}
+              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 0 0 ${(isCurrent ? 20 : 15)}
+              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 0 0
+              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 0 ${-(isCurrent ? 20 : 15)}
               Z`}
           fill={`url(#yinGradient-${node.id})`}
         />
         
         {/* Small yin (dark) circle in yang side */}
         <circle
-          cx={position.x}
-          cy={position.y - (isCurrent ? 10 : 7.5)}
+          cx={0}
+          cy={-(isCurrent ? 10 : 7.5)}
           r={(isCurrent ? 4 : 3)}
           fill={`url(#yinGradient-${node.id})`}
         />
         
         {/* Small yang (light) circle in yin side */}
         <circle
-          cx={position.x}
-          cy={position.y + (isCurrent ? 10 : 7.5)}
+          cx={0}
+          cy={(isCurrent ? 10 : 7.5)}
           r={(isCurrent ? 4 : 3)}
           fill={`url(#yangGradient-${node.id})`}
         />
@@ -172,8 +196,16 @@ const YinYangNode = ({
         y={position.y + 30}
         style={nodeTextStyle}
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: index * 0.1 + 0.2 }}
+        animate={{ 
+          opacity: 1,
+          x: position.x,
+          y: position.y + 30
+        }}
+        transition={{ 
+          opacity: { delay: index * 0.1 + 0.2 },
+          x: { duration: 0.6, ease: "easeInOut" },
+          y: { duration: 0.6, ease: "easeInOut" }
+        }}
       >
         {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
       </motion.text>
@@ -189,8 +221,18 @@ const YinYangNode = ({
           strokeWidth={3}
           opacity={0.8}
           initial={{ scale: 1, opacity: 0 }}
-          animate={{ scale: isCurrent ? 1.2 : 1.4, opacity: 0.8 }}
-          transition={{ duration: 0.2 }}
+          animate={{ 
+            scale: isCurrent ? 1.2 : 1.4, 
+            opacity: 0.8,
+            cx: position.x,
+            cy: position.y
+          }}
+          transition={{ 
+            scale: { duration: 0.2 },
+            opacity: { duration: 0.2 },
+            cx: { duration: 0.6, ease: "easeInOut" },
+            cy: { duration: 0.6, ease: "easeInOut" }
+          }}
         />
       )}
       
@@ -204,8 +246,18 @@ const YinYangNode = ({
           stroke="rgba(255, 255, 255, 0.6)"
           strokeWidth={2}
           opacity={0.3}
-          animate={{ r: [20, 30, 20], opacity: [0.3, 0, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          animate={{ 
+            r: [20, 30, 20], 
+            opacity: [0.3, 0, 0.3],
+            cx: position.x,
+            cy: position.y
+          }}
+          transition={{ 
+            r: { duration: 2, repeat: Infinity },
+            opacity: { duration: 2, repeat: Infinity },
+            cx: { duration: 0.6, ease: "easeInOut" },
+            cy: { duration: 0.6, ease: "easeInOut" }
+          }}
         />
       )}
     </g>

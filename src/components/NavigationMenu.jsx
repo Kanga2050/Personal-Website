@@ -9,6 +9,8 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
   const [yinYangHoverSide, setYinYangHoverSide] = useState(null); // 'yin' or 'yang'
   const [backgroundCircleRadius, setBackgroundCircleRadius] = useState(0);
   const [backgroundTheme, setBackgroundTheme] = useState(null);
+  const [animatedPositions, setAnimatedPositions] = useState({});
+  const [previousCurrentNode, setPreviousCurrentNode] = useState(currentNode);
 
   useEffect(() => {
     // Get current node and its adjacent nodes
@@ -23,6 +25,17 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     });
     
     setVisibleNodes(nodes);
+    
+    // Handle smooth transitions when currentNode changes within the same graph level
+    if (previousCurrentNode !== currentNode && navigationPath.length > 0) {
+      // Calculate new positions for all nodes
+      const newPositions = {};
+      nodes.forEach((node, index) => {
+        newPositions[node.id] = getNodePosition(node.id, index, nodes.length);
+      });
+      setAnimatedPositions(newPositions);
+      setPreviousCurrentNode(currentNode);
+    }
     
     // Maintain background circle for subgraph navigation
     // If we're in a subgraph (navigationPath length > 1), keep the background circle visible
@@ -43,7 +56,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
         setBackgroundTheme(null);
       }
     }
-  }, [currentNode, memoryGraph, navigationPath]);
+  }, [currentNode, memoryGraph, navigationPath, previousCurrentNode]);
 
   // Helper function to get parent node theme from the main memory graph
   const getParentNodeTheme = (nodeId) => {
@@ -100,6 +113,16 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
       x: 180 + Math.cos(angle) * radius,
       y: 120 + Math.sin(angle) * radius
     };
+  };
+
+  // Get animated position for smooth transitions
+  const getAnimatedNodePosition = (nodeId, index, total) => {
+    // If we have an animated position for this node, use it
+    if (animatedPositions[nodeId]) {
+      return animatedPositions[nodeId];
+    }
+    // Otherwise, fall back to the calculated position
+    return getNodePosition(nodeId, index, total);
   };
 
   const getNodeColor = (theme) => {
@@ -168,12 +191,12 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
       // Current node with sub-graph - enter sub-graph with expansion animation
       startExpansionAnimation(clickedNode, () => {
         onEnterSubGraph(nodeId);
-        setIsOpen(false);
+        // Keep menu open for subgraph navigation
       });
     } else if (nodeId !== currentNode) {
-      // Navigate to different node
+      // Navigate to different node - keep menu open for smoother experience
       onNavigate(nodeId);
-      setIsOpen(false);
+      // Don't close menu immediately - let it stay open for continuous navigation
     }
   };
 
@@ -274,6 +297,11 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
   const handleBackgroundClick = (e) => {
     if (!isOpen) return;
     
+    // Don't close menu if clicking on nodes or their text - only on empty background
+    if (e.target.tagName === 'circle' || e.target.tagName === 'text' || e.target.tagName === 'g') {
+      return;
+    }
+    
     const rect = e.currentTarget.getBoundingClientRect();
     const centerX = 180; // SVG center (adjusted)
     const centerY = 120; // SVG center (adjusted)
@@ -299,6 +327,9 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
       } else {
         onExitSubGraph();
       }
+      // Don't close menu when exiting subgraph - keep it open for continued navigation
+    } else if (navigationPath.length === 1 && distance > 120) {
+      // Only close menu when clicking far outside the node area at root level
       setIsOpen(false);
     }
   };
@@ -314,7 +345,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
       
       // Navigate to techno node first
       onNavigate('techno');
-      setIsOpen(false);
+      // Keep menu open for continued navigation
       
       // Then set the appropriate mode after a brief delay
       setTimeout(() => {
@@ -475,8 +506,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                   } : {}}
                 />
               )}
-              
-              {/* Render edges first */}
+               {/* Render edges first */}
               {visibleNodes.map((nodeA, indexA) => {
                 return visibleNodes.map((nodeB, indexB) => {
                   // Skip if same node or if we've already rendered this edge
@@ -488,9 +518,9 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                   
                   if (!hasEdgeAB && !hasEdgeBA) return null;
                   
-                  const posA = getNodePosition(nodeA.id, indexA, visibleNodes.length);
-                  const posB = getNodePosition(nodeB.id, indexB, visibleNodes.length);
-                  
+                  const posA = getAnimatedNodePosition(nodeA.id, indexA, visibleNodes.length);
+                  const posB = getAnimatedNodePosition(nodeB.id, indexB, visibleNodes.length);
+
                   return (
                     <motion.line
                       key={`edge-${nodeA.id}-${nodeB.id}`}
@@ -500,8 +530,20 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                       y2={posB.y}
                       style={edgeStyle}
                       initial={{ pathLength: 0 }}
-                      animate={{ pathLength: 1 }}
-                      transition={{ delay: 0.3 + (indexA + indexB) * 0.05, duration: 0.5 }}
+                      animate={{ 
+                        pathLength: 1,
+                        x1: posA.x,
+                        y1: posA.y,
+                        x2: posB.x,
+                        y2: posB.y
+                      }}
+                      transition={{ 
+                        pathLength: { delay: 0.3 + (indexA + indexB) * 0.05, duration: 0.5 },
+                        x1: { duration: 0.6, ease: "easeInOut" },
+                        y1: { duration: 0.6, ease: "easeInOut" },
+                        x2: { duration: 0.6, ease: "easeInOut" },
+                        y2: { duration: 0.6, ease: "easeInOut" }
+                      }}
                     />
                   );
                 });
@@ -509,7 +551,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
               
               {/* Render nodes */}
               {visibleNodes.map((node, index) => {
-                const position = getNodePosition(node.id, index, visibleNodes.length);
+                const position = getAnimatedNodePosition(node.id, index, visibleNodes.length);
                 const isCurrent = node.id === currentNode;
                 const nodeColor = getNodeColor(node.theme);
                 
@@ -529,7 +571,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                       onHoverEnd={handleYinYangHoverEnd}
                       onToggleTime={onToggleTime}
                       onNavigate={onNavigate}
-                      onClose={() => setIsOpen(false)}
+                      onClose={() => {}} // Keep menu open - no closing action
                     />
                   );
                 }
@@ -545,22 +587,46 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                       stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.5)'}
                       strokeWidth={isCurrent ? 3 : 2}
                       style={nodeStyle}
-                      onClick={() => handleNodeClick(node.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent background click
+                        handleNodeClick(node.id);
+                      }}
                       onMouseEnter={() => setHoveredNode(node.id)}
                       onMouseLeave={() => setHoveredNode(null)}
                       initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: index * 0.1 }}
+                      animate={{ 
+                        scale: 1,
+                        cx: position.x,
+                        cy: position.y,
+                        r: isCurrent ? 20 : 15
+                      }}
+                      transition={{ 
+                        scale: { delay: index * 0.1 },
+                        cx: { duration: 0.6, ease: "easeInOut" },
+                        cy: { duration: 0.6, ease: "easeInOut" },
+                        r: { duration: 0.3, ease: "easeInOut" }
+                      }}
                       whileTap={{ scale: 0.9 }}
                     />
                     <motion.text
                       x={position.x}
                       y={position.y + 30}
                       style={nodeTextStyle}
-                      onClick={() => handleNodeClick(node.id)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent background click
+                        handleNodeClick(node.id);
+                      }}
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: index * 0.1 + 0.2 }}
+                      animate={{ 
+                        opacity: 1,
+                        x: position.x,
+                        y: position.y + 30
+                      }}
+                      transition={{ 
+                        opacity: { delay: index * 0.1 + 0.2 },
+                        x: { duration: 0.6, ease: "easeInOut" },
+                        y: { duration: 0.6, ease: "easeInOut" }
+                      }}
                     >
                       {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
                     </motion.text>
@@ -577,8 +643,16 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                             fill="white"
                             opacity={0.9}
                             initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            transition={{ delay: index * 0.1 + 0.4 + dotIndex * 0.1 }}
+                            animate={{ 
+                              scale: 1,
+                              cx: position.x + Math.cos(dotIndex * 2 * Math.PI / 3) * (isCurrent ? 28 : 23),
+                              cy: position.y + Math.sin(dotIndex * 2 * Math.PI / 3) * (isCurrent ? 28 : 23)
+                            }}
+                            transition={{ 
+                              scale: { delay: index * 0.1 + 0.4 + dotIndex * 0.1 },
+                              cx: { duration: 0.6, ease: "easeInOut" },
+                              cy: { duration: 0.6, ease: "easeInOut" }
+                            }}
                           />
                         ))}
                         {/* Add a pulsing ring for current nodes with subgraph */}
@@ -591,8 +665,18 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                             stroke="yellow"
                             strokeWidth={2}
                             opacity={0.6}
-                            animate={{ r: [25, 35, 25], opacity: [0.6, 0.2, 0.6] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
+                            animate={{ 
+                              r: [25, 35, 25], 
+                              opacity: [0.6, 0.2, 0.6],
+                              cx: position.x,
+                              cy: position.y
+                            }}
+                            transition={{ 
+                              r: { duration: 1.5, repeat: Infinity },
+                              opacity: { duration: 1.5, repeat: Infinity },
+                              cx: { duration: 0.6, ease: "easeInOut" },
+                              cy: { duration: 0.6, ease: "easeInOut" }
+                            }}
                           />
                         )}
                       </g>
@@ -609,8 +693,18 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                         strokeWidth={3}
                         opacity={0.8}
                         initial={{ scale: 1, opacity: 0 }}
-                        animate={{ scale: isCurrent ? 1.2 : 1.4, opacity: 0.8 }}
-                        transition={{ duration: 0.2 }}
+                        animate={{ 
+                          scale: isCurrent ? 1.2 : 1.4, 
+                          opacity: 0.8,
+                          cx: position.x,
+                          cy: position.y
+                        }}
+                        transition={{ 
+                          scale: { duration: 0.2 },
+                          opacity: { duration: 0.2 },
+                          cx: { duration: 0.6, ease: "easeInOut" },
+                          cy: { duration: 0.6, ease: "easeInOut" }
+                        }}
                       />
                     )}
                     
@@ -624,8 +718,18 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                         stroke={nodeColor}
                         strokeWidth={2}
                         opacity={0.3}
-                        animate={{ r: [20, 30, 20], opacity: [0.3, 0, 0.3] }}
-                        transition={{ duration: 2, repeat: Infinity }}
+                        animate={{ 
+                          r: [20, 30, 20], 
+                          opacity: [0.3, 0, 0.3],
+                          cx: position.x,
+                          cy: position.y
+                        }}
+                        transition={{ 
+                          r: { duration: 2, repeat: Infinity },
+                          opacity: { duration: 2, repeat: Infinity },
+                          cx: { duration: 0.6, ease: "easeInOut" },
+                          cy: { duration: 0.6, ease: "easeInOut" }
+                        }}
                       />
                     )}
                   </g>
