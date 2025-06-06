@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import YinYangNode from './YinYangNode';
 
-const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onToggleTime }) => {
+const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph, onExitSubGraph, navigationPath, isNightMode, onToggleTime }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [visibleNodes, setVisibleNodes] = useState([]);
   const [hoveredNode, setHoveredNode] = useState(null);
   const [yinYangHoverSide, setYinYangHoverSide] = useState(null); // 'yin' or 'yang'
+  const [backgroundCircleRadius, setBackgroundCircleRadius] = useState(0);
+  const [backgroundTheme, setBackgroundTheme] = useState(null);
 
   useEffect(() => {
     // Get current node and its adjacent nodes
@@ -21,19 +23,82 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
     });
     
     setVisibleNodes(nodes);
-  }, [currentNode, memoryGraph]);
+    
+    // Maintain background circle for subgraph navigation
+    // If we're in a subgraph (navigationPath length > 1), keep the background circle visible
+    if (navigationPath.length > 1) {
+      // Get the parent node theme from the navigation path
+      const parentNodeId = navigationPath[navigationPath.length - 1];
+      // We need to get the theme from the root level nodes since we're in a subgraph
+      const parentNodeTheme = getParentNodeTheme(parentNodeId);
+      if (parentNodeTheme && backgroundCircleRadius === 0) {
+        setBackgroundTheme(parentNodeTheme);
+        const requiredRadius = calculateRequiredRadius();
+        setBackgroundCircleRadius(requiredRadius); // Set to calculated size immediately
+      }
+    } else {
+      // We're back at the root level, clear the background circle
+      if (backgroundCircleRadius > 0) {
+        setBackgroundCircleRadius(0);
+        setBackgroundTheme(null);
+      }
+    }
+  }, [currentNode, memoryGraph, navigationPath]);
+
+  // Helper function to get parent node theme from the main memory graph
+  const getParentNodeTheme = (nodeId) => {
+    // Look in the main memoryGraph for the parent node theme
+    // We need to traverse from App.jsx's memoryGraph, but since we don't have direct access,
+    // we'll use a mapping approach
+    const themeMapping = {
+      'techno': 'yellow-techno',
+      'projects': 'green',
+      'engineering': 'tech',
+      'memories': 'nostalgic'
+    };
+    return themeMapping[nodeId] || 'green'; // Default to green if not found
+  };
+
+  // Calculate the minimum radius needed to contain all nodes in a given graph
+  const calculateRequiredRadiusForGraph = (graphNodes, graphEdges, centralNodeId) => {
+    if (!graphNodes || Object.keys(graphNodes).length <= 1) return 60; // Smaller minimum radius
+    
+    const nodeIds = Object.keys(graphNodes);
+    const adjacentNodes = nodeIds.filter(id => id !== centralNodeId);
+    
+    if (adjacentNodes.length === 0) return 60;
+    
+    // The nodes are positioned in a circle of radius 70 around center
+    // We just need to add the node radius (15px) plus small padding
+    const nodePositionRadius = 70; // Distance from center to node centers
+    const nodeRadius = 15; // Radius of non-current nodes
+    const padding = 8; // Small padding around nodes
+    
+    const requiredRadius = nodePositionRadius + nodeRadius + padding;
+    
+    return Math.max(requiredRadius, 60); // Ensure minimum radius of 60
+  };
+
+  // Calculate the minimum radius needed to contain all visible nodes
+  const calculateRequiredRadius = () => {
+    return calculateRequiredRadiusForGraph(
+      memoryGraph.nodes, 
+      memoryGraph.edges, 
+      currentNode
+    );
+  };
 
   const getNodePosition = (nodeId, index, total) => {
     if (nodeId === currentNode) {
-      return { x: 150, y: 100 }; // Center position for current node
+      return { x: 180, y: 120 }; // Center position for current node (adjusted for larger SVG)
     }
     
     // Position adjacent nodes in a circle around the current node
     const angle = (index * 2 * Math.PI) / (total - 1);
-    const radius = 60;
+    const radius = 70;
     return {
-      x: 150 + Math.cos(angle) * radius,
-      y: 100 + Math.sin(angle) * radius
+      x: 180 + Math.cos(angle) * radius,
+      y: 120 + Math.sin(angle) * radius
     };
   };
 
@@ -81,9 +146,159 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
     return node ? getNodeColor(node.theme) : '#6b7280';
   };
 
+  const getBackgroundColor = (theme) => {
+    const color = getNodeColor(theme);
+    // Convert hex to rgba with better opacity for visibility
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    
+    // Use higher opacity and add brightness adjustment for better visibility
+    const brightness = 0.4; // Increase brightness
+    const opacity = 0.6; // Increase opacity
+    
+    return `rgba(${Math.min(255, r + r * brightness)}, ${Math.min(255, g + g * brightness)}, ${Math.min(255, b + b * brightness)}, ${opacity})`;
+  };
+
   const handleNodeClick = (nodeId) => {
-    if (nodeId !== currentNode) {
+    const clickedNode = memoryGraph.nodes[nodeId];
+    
+    if (nodeId === currentNode && clickedNode.subGraph) {
+      // Current node with sub-graph - enter sub-graph with expansion animation
+      startExpansionAnimation(clickedNode, () => {
+        onEnterSubGraph(nodeId);
+        setIsOpen(false);
+      });
+    } else if (nodeId !== currentNode) {
+      // Navigate to different node
       onNavigate(nodeId);
+      setIsOpen(false);
+    }
+  };
+
+  const startExpansionAnimation = (node, onComplete) => {
+    setBackgroundTheme(node.theme);
+    setBackgroundCircleRadius(0);
+    
+    // Calculate the target radius based on the subgraph contents
+    let targetRadius = 80; // Default minimum
+    if (node.subGraph && node.subGraph.nodes) {
+      // Find the hub node ID (the central node in the subgraph)
+      const hubNodeId = `${node.id}-hub`;
+      const centralNodeId = node.subGraph.nodes[hubNodeId] ? hubNodeId : Object.keys(node.subGraph.nodes)[0];
+      targetRadius = calculateRequiredRadiusForGraph(
+        node.subGraph.nodes, 
+        node.subGraph.edges, 
+        centralNodeId
+      );
+    }
+    
+    // Use a more reliable animation approach with requestAnimationFrame
+    let animationId;
+    let startTime = null;
+    const duration = 800; // 800ms for expansion
+    
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Use easeOut animation curve
+      const easedProgress = 1 - Math.pow(1 - progress, 3);
+      const newRadius = easedProgress * targetRadius;
+      
+      setBackgroundCircleRadius(newRadius);
+      
+      if (progress < 1) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // Animation complete - call onComplete but keep the circle visible
+        // The circle will persist to show the exit boundary
+        onComplete();
+      }
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    // Return cleanup function
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  };
+
+  const startCollapseAnimation = (theme, onComplete) => {
+    setBackgroundTheme(theme);
+    const startRadius = backgroundCircleRadius; // Use current radius as starting point
+    
+    // Use a more reliable animation approach with requestAnimationFrame
+    let animationId;
+    let startTime = null;
+    const duration = 600; // 600ms for collapse
+    
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Use easeIn animation curve for collapse
+      const easedProgress = Math.pow(progress, 2);
+      const newRadius = startRadius * (1 - easedProgress);
+      
+      setBackgroundCircleRadius(newRadius);
+      
+      if (progress < 1) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        // Animation complete - reset and call onComplete
+        setBackgroundCircleRadius(0);
+        setBackgroundTheme(null);
+        setTimeout(() => {
+          onComplete();
+        }, 100);
+      }
+    };
+    
+    animationId = requestAnimationFrame(animate);
+    
+    // Return cleanup function
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  };
+
+  const handleBackgroundClick = (e) => {
+    if (!isOpen) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const centerX = 180; // SVG center (adjusted)
+    const centerY = 120; // SVG center (adjusted)
+    const clickX = e.nativeEvent.offsetX;
+    const clickY = e.nativeEvent.offsetY;
+    
+    // Calculate distance from center
+    const distance = Math.sqrt(Math.pow(clickX - centerX, 2) + Math.pow(clickY - centerY, 2));
+    
+    // Use the current background circle radius as the boundary (with small buffer for better UX)
+    const boundaryRadius = backgroundCircleRadius - 10; // 10px buffer inside the circle
+    
+    // If clicked outside the boundary and we're in a sub-graph, exit with animation
+    if (distance > boundaryRadius && navigationPath.length > 1) {
+      const currentNodeData = memoryGraph.nodes[currentNode];
+      if (currentNodeData) {
+        // Get the theme for the collapse animation
+        const parentNodeId = navigationPath[navigationPath.length - 1];
+        const parentTheme = getParentNodeTheme(parentNodeId);
+        startCollapseAnimation(parentTheme, () => {
+          onExitSubGraph();
+        });
+      } else {
+        onExitSubGraph();
+      }
       setIsOpen(false);
     }
   };
@@ -146,8 +361,8 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
     position: 'fixed',
     top: '80px',
     right: '20px',
-    width: '300px',
-    height: '200px',
+    width: '360px',
+    height: '240px',
     backgroundColor: 'rgba(0, 0, 0, 0.9)',
     border: '1px solid rgba(255, 255, 255, 0.2)',
     borderRadius: '12px',
@@ -198,7 +413,38 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
       {/* Menu Panel */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <>
+            {/* Navigation Path Indicator */}
+            {navigationPath.length > 1 && (
+              <motion.div
+                style={{
+                  position: 'fixed',
+                  top: '40px',
+                  right: '20px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '8px',
+                  padding: '8px 12px',
+                  zIndex: 98,
+                  backdropFilter: 'blur(10px)',
+                  fontSize: '12px',
+                  color: 'white',
+                  fontFamily: 'monospace'
+                }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <div style={{ marginBottom: '4px', opacity: 0.7 }}>
+                  Level {navigationPath.length - 1}
+                </div>
+                <div>
+                  Path: {navigationPath.slice(1).join(' → ')}
+                </div>
+              </motion.div>
+            )}
+            
+            <motion.div
             style={menuPanelStyle}
             initial={{ opacity: 0, scale: 0.8, y: -20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -206,7 +452,30 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
             transition={{ duration: 0.2 }}
           >
             
-            <svg style={svgStyle}>
+            <svg style={svgStyle} onClick={handleBackgroundClick}>
+              {/* Background circle for expansion animation and subgraph boundary indicator */}
+              {backgroundCircleRadius > 0 && backgroundTheme && (
+                <motion.circle
+                  cx={180}
+                  cy={120}
+                  r={backgroundCircleRadius}
+                  fill={getBackgroundColor(backgroundTheme)}
+                  stroke={getNodeColor(backgroundTheme)}
+                  strokeWidth="2"
+                  opacity={navigationPath.length > 1 ? 0.3 : 0.8} // Lower opacity when persistent
+                  style={{ pointerEvents: 'none' }}
+                  strokeDasharray={navigationPath.length > 1 ? "5,5" : "none"} // Dashed when persistent
+                  animate={navigationPath.length > 1 ? {
+                    strokeDashoffset: [0, -10],
+                    opacity: [0.3, 0.4, 0.3]
+                  } : {}}
+                  transition={navigationPath.length > 1 ? {
+                    strokeDashoffset: { duration: 2, repeat: Infinity, ease: "linear" },
+                    opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                  } : {}}
+                />
+              )}
+              
               {/* Render edges first */}
               {visibleNodes.map((nodeA, indexA) => {
                 return visibleNodes.map((nodeB, indexB) => {
@@ -296,6 +565,39 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
                       {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
                     </motion.text>
                     
+                    {/* Sub-graph indicator - small dots around the node */}
+                    {node.subGraph && (
+                      <g>
+                        {[0, 1, 2].map(dotIndex => (
+                          <motion.circle
+                            key={`subgraph-indicator-${dotIndex}`}
+                            cx={position.x + Math.cos(dotIndex * 2 * Math.PI / 3) * (isCurrent ? 28 : 23)}
+                            cy={position.y + Math.sin(dotIndex * 2 * Math.PI / 3) * (isCurrent ? 28 : 23)}
+                            r={2}
+                            fill="white"
+                            opacity={0.9}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: index * 0.1 + 0.4 + dotIndex * 0.1 }}
+                          />
+                        ))}
+                        {/* Add a pulsing ring for current nodes with subgraph */}
+                        {isCurrent && (
+                          <motion.circle
+                            cx={position.x}
+                            cy={position.y}
+                            r={25}
+                            fill="none"
+                            stroke="yellow"
+                            strokeWidth={2}
+                            opacity={0.6}
+                            animate={{ r: [25, 35, 25], opacity: [0.6, 0.2, 0.6] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                          />
+                        )}
+                      </g>
+                    )}
+                    
                     {/* Add hover halo effect showing destination color */}
                     {hoveredNode === node.id && (
                       <motion.circle
@@ -332,6 +634,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, isNightMode, onT
             </svg>
             
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
