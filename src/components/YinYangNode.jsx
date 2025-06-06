@@ -59,6 +59,8 @@ const YinYangNode = ({
     return '#facc15';
   };
 
+  const nodeRadius = isCurrent ? 20 : 15;
+
   return (
     <g>
       {/* Define gradients for yin-yang */}
@@ -79,9 +81,9 @@ const YinYangNode = ({
       {/* Invisible hover zones for yin-yang sides */}
       {/* Left side (Yin) hover zone */}
       <motion.path
-        d={`M ${position.x - (isCurrent ? 20 : 15)} ${position.y}
-            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
-            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+        d={`M ${position.x - nodeRadius} ${position.y}
+            A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y - nodeRadius}
+            A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y + nodeRadius}
             Z`}
         fill="transparent"
         style={{ cursor: 'pointer' }}
@@ -100,9 +102,9 @@ const YinYangNode = ({
           }
         }}
         animate={{
-          d: `M ${position.x - (isCurrent ? 20 : 15)} ${position.y}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y - (isCurrent ? 20 : 15)}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+          d: `M ${position.x - nodeRadius} ${position.y}
+              A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y - nodeRadius}
+              A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y + nodeRadius}
               Z`
         }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
@@ -110,9 +112,9 @@ const YinYangNode = ({
       
       {/* Right side (Yang) hover zone */}
       <motion.path
-        d={`M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
-            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x + (isCurrent ? 20 : 15)} ${position.y}
-            A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+        d={`M ${position.x} ${position.y - nodeRadius}
+            A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x + nodeRadius} ${position.y}
+            A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y + nodeRadius}
             Z`}
         fill="transparent"
         style={{ cursor: 'pointer' }}
@@ -131,66 +133,107 @@ const YinYangNode = ({
           }
         }}
         animate={{
-          d: `M ${position.x} ${position.y - (isCurrent ? 20 : 15)}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x + (isCurrent ? 20 : 15)} ${position.y}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 1 ${position.x} ${position.y + (isCurrent ? 20 : 15)}
+          d: `M ${position.x} ${position.y - nodeRadius}
+              A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x + nodeRadius} ${position.y}
+              A ${nodeRadius} ${nodeRadius} 0 0 1 ${position.x} ${position.y + nodeRadius}
               Z`
         }}
         transition={{ duration: 0.6, ease: "easeInOut" }}
       />
       
-      {/* Yin-Yang design */}
-      <motion.g
+      {/* Yang (light) background circle - uses same animation pattern as regular nodes */}
+      <motion.circle
+        cx={position.x}
+        cy={position.y}
+        r={nodeRadius}
+        fill={`url(#yangGradient-${node.id})`}
+        stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.3)'}
+        strokeWidth={isCurrent ? 3 : 2}
+        style={{ cursor: 'pointer', pointerEvents: 'none' }}
         initial={{ scale: 0 }}
         animate={{ 
           scale: 1,
-          x: position.x,
-          y: position.y
+          cx: position.x,
+          cy: position.y,
+          r: nodeRadius
         }}
         transition={{ 
           scale: { delay: index * 0.1 },
-          x: { duration: 0.6, ease: "easeInOut" },
-          y: { duration: 0.6, ease: "easeInOut" }
+          cx: { duration: 0.6, ease: "easeInOut" },
+          cy: { duration: 0.6, ease: "easeInOut" },
+          r: { duration: 0.3, ease: "easeInOut" }
         }}
-        style={{ pointerEvents: 'none' }}
-      >
-        {/* Yang (light) background circle */}
-        <circle
-          cx={0}
-          cy={0}
-          r={isCurrent ? 20 : 15}
-          fill={`url(#yangGradient-${node.id})`}
-          stroke={isCurrent ? 'white' : 'rgba(255, 255, 255, 0.3)'}
-          strokeWidth={isCurrent ? 1.5 : 1}
-        />
-        
-        {/* Yin (dark) half - teardrop shape */}
-        <path
-          d={`M 0 ${-(isCurrent ? 20 : 15)}
-              A ${isCurrent ? 20 : 15} ${isCurrent ? 20 : 15} 0 0 0 0 ${(isCurrent ? 20 : 15)}
-              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 0 0 0
-              A ${(isCurrent ? 20 : 15)/2} ${(isCurrent ? 20 : 15)/2} 0 0 1 0 ${-(isCurrent ? 20 : 15)}
-              Z`}
-          fill={`url(#yinGradient-${node.id})`}
-        />
-        
-        {/* Small yin (dark) circle in yang side */}
-        <circle
-          cx={0}
-          cy={-(isCurrent ? 10 : 7.5)}
-          r={(isCurrent ? 4 : 3)}
-          fill={`url(#yinGradient-${node.id})`}
-        />
-        
-        {/* Small yang (light) circle in yin side */}
-        <circle
-          cx={0}
-          cy={(isCurrent ? 10 : 7.5)}
-          r={(isCurrent ? 4 : 3)}
-          fill={`url(#yangGradient-${node.id})`}
-        />
-      </motion.g>
+      />
       
+      {/* Yin (dark) half - teardrop shape */}
+      <motion.path
+        d={`M ${position.x} ${position.y - nodeRadius}
+            A ${nodeRadius} ${nodeRadius} 0 0 0 ${position.x} ${position.y + nodeRadius}
+            A ${nodeRadius/2} ${nodeRadius/2} 0 0 0 ${position.x} ${position.y}
+            A ${nodeRadius/2} ${nodeRadius/2} 0 0 1 ${position.x} ${position.y - nodeRadius}
+            Z`}
+        fill={`url(#yinGradient-${node.id})`}
+        style={{ pointerEvents: 'none' }}
+        initial={{ scale: 0 }}
+        animate={{ 
+          scale: 1,
+          d: `M ${position.x} ${position.y - nodeRadius}
+              A ${nodeRadius} ${nodeRadius} 0 0 0 ${position.x} ${position.y + nodeRadius}
+              A ${nodeRadius/2} ${nodeRadius/2} 0 0 0 ${position.x} ${position.y}
+              A ${nodeRadius/2} ${nodeRadius/2} 0 0 1 ${position.x} ${position.y - nodeRadius}
+              Z`
+        }}
+        transition={{ 
+          scale: { delay: index * 0.1 },
+          d: { duration: 0.6, ease: "easeInOut" }
+        }}
+      />
+      
+      {/* Small yin (dark) circle in yang side */}
+      <motion.circle
+        cx={position.x}
+        cy={position.y - nodeRadius/2}
+        r={nodeRadius/5}
+        fill={`url(#yinGradient-${node.id})`}
+        style={{ pointerEvents: 'none' }}
+        initial={{ scale: 0 }}
+        animate={{ 
+          scale: 1,
+          cx: position.x,
+          cy: position.y - nodeRadius/2,
+          r: nodeRadius/5
+        }}
+        transition={{ 
+          scale: { delay: index * 0.1 + 0.1 },
+          cx: { duration: 0.6, ease: "easeInOut" },
+          cy: { duration: 0.6, ease: "easeInOut" },
+          r: { duration: 0.3, ease: "easeInOut" }
+        }}
+      />
+      
+      {/* Small yang (light) circle in yin side */}
+      <motion.circle
+        cx={position.x}
+        cy={position.y + nodeRadius/2}
+        r={nodeRadius/5}
+        fill={`url(#yangGradient-${node.id})`}
+        style={{ pointerEvents: 'none' }}
+        initial={{ scale: 0 }}
+        animate={{ 
+          scale: 1,
+          cx: position.x,
+          cy: position.y + nodeRadius/2,
+          r: nodeRadius/5
+        }}
+        transition={{ 
+          scale: { delay: index * 0.1 + 0.1 },
+          cx: { duration: 0.6, ease: "easeInOut" },
+          cy: { duration: 0.6, ease: "easeInOut" },
+          r: { duration: 0.3, ease: "easeInOut" }
+        }}
+      />
+
+      {/* Node text - same animation pattern as regular nodes */}
       <motion.text
         x={position.x}
         y={position.y + 30}
@@ -210,12 +253,14 @@ const YinYangNode = ({
         {node.title.length > 12 ? node.title.substring(0, 12) + '...' : node.title}
       </motion.text>
       
-      {/* Add hover halo effect */}
+
+      
+      {/* Add hover halo effect - same as regular nodes */}
       {hoveredNode === node.id && (
         <motion.circle
           cx={position.x}
           cy={position.y}
-          r={isCurrent ? 20 : 15}
+          r={nodeRadius}
           fill="none"
           stroke={getHoverHaloColor()}
           strokeWidth={3}
@@ -236,18 +281,18 @@ const YinYangNode = ({
         />
       )}
       
-      {/* Add pulsing effect for current node */}
+      {/* Add pulsing effect for current node - same as regular nodes */}
       {isCurrent && (
         <motion.circle
           cx={position.x}
           cy={position.y}
-          r={20}
+          r={nodeRadius}
           fill="none"
           stroke="rgba(255, 255, 255, 0.6)"
           strokeWidth={2}
           opacity={0.3}
           animate={{ 
-            r: [20, 30, 20], 
+            r: [nodeRadius, nodeRadius + 10, nodeRadius], 
             opacity: [0.3, 0, 0.3],
             cx: position.x,
             cy: position.y

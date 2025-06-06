@@ -555,7 +555,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                 const isCurrent = node.id === currentNode;
                 const nodeColor = getNodeColor(node.theme);
                 
-                // Special handling for techno node - render as yin-yang
+                // Special handling for techno node - render as yin-yang but treat as regular node
                 if (node.id === 'techno') {
                   return (
                     <YinYangNode
@@ -570,7 +570,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
                       onHover={handleYinYangHover}
                       onHoverEnd={handleYinYangHoverEnd}
                       onToggleTime={onToggleTime}
-                      onNavigate={onNavigate}
+                      onNavigate={onNavigate} // Regular navigation, no subgraph expansion
                       onClose={() => {}} // Keep menu open - no closing action
                     />
                   );
