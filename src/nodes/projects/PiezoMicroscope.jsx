@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import ParticleSystem from '../../components/ParticleSystem';
 import AmbientParticles from '../../components/AmbientParticles';
 
-const PiezoMicroscope = ({ onNavigate }) => {
+const PiezoMicroscope = ({ onNavigate, projectsHubTarget }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -245,7 +245,7 @@ const PiezoMicroscope = ({ onNavigate }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate('projects')}
+            onClick={() => onNavigate(projectsHubTarget || 'projects')}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(225, 190, 231, 0.2)';
               e.target.style.boxShadow = '0 5px 15px rgba(225, 190, 231, 0.4)';

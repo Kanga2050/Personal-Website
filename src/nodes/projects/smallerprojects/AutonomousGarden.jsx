@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ParticleSystem from '../../components/ParticleSystem';
-import AmbientParticles from '../../components/AmbientParticles';
+import ParticleSystem from '../../../components/ParticleSystem';
+import AmbientParticles from '../../../components/AmbientParticles';
 
-const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
+const AutonomousGarden = ({ onNavigate }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a4a2e 0%, #0d2818 50%, #051a0d 100%)',
-    color: '#00ff88',
+    background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #16a34a 100%)',
+    color: '#86efac',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -35,9 +35,12 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   const containerStyle = {
     position: 'relative',
     zIndex: 10,
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '40px 20px'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: '40px'
   };
 
   const titleStyle = {
@@ -45,26 +48,26 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #00ff88',
-    background: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    color: '#bbf7d0',
+    textShadow: '0 0 20px rgba(187, 247, 208, 0.5)'
   };
 
   const sectionStyle = {
-    marginBottom: '3rem',
-    background: 'rgba(0, 255, 136, 0.05)',
-    padding: '2rem',
+    backgroundColor: 'rgba(134, 239, 172, 0.1)',
     borderRadius: '15px',
-    border: '1px solid rgba(0, 255, 136, 0.2)'
+    padding: '2rem',
+    marginBottom: '2rem',
+    maxWidth: '800px',
+    width: '100%',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(134, 239, 172, 0.2)'
   };
 
   const sectionTitleStyle = {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
-    color: '#66ffaa'
+    color: '#bbf7d0'
   };
 
   const textStyle = {
@@ -90,10 +93,10 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     display: 'inline-block',
     padding: '1rem 2rem',
     margin: '0.5rem',
-    border: '2px solid rgba(0, 255, 136, 0.5)',
+    border: '2px solid rgba(134, 239, 172, 0.5)',
     borderRadius: '12px',
-    background: 'rgba(0, 255, 136, 0.1)',
-    color: '#00ff88',
+    background: 'rgba(134, 239, 172, 0.1)',
+    color: '#86efac',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textDecoration: 'none',
@@ -116,14 +119,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
       
       <ParticleSystem 
         canvasRef={canvasRef}
-        particleColor="#00ff88"
-        particleCount={100}
-        speed={0.6}
+        particleColor="#86efac"
+        particleCount={110}
+        speed={0.5}
       />
       
       <AmbientParticles 
         canvasRef={canvasRef}
-        color="#00ff88"
+        color="#86efac"
         opacity={0.3}
       />
 
@@ -139,7 +142,7 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          5-Axis 3D Printer
+          Autonomous Garden System
         </motion.h1>
 
         <motion.div 
@@ -150,13 +153,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Project Overview</h2>
           <p style={textStyle}>
-            Revolutionary 5-axis 3D printer that can rotate and tilt the print bed during printing, 
-            enabling complex overhangs and internal structures without support material. This advanced 
-            manufacturing system represents a breakthrough in additive manufacturing technology.
+            AI-driven smart irrigation and plant health monitoring system that autonomously manages 
+            garden care through advanced sensor networks and machine learning algorithms. This system 
+            optimizes water usage while maximizing plant health and growth.
           </p>
           <p style={textStyle}>
-            The printer combines traditional FDM printing with CNC-style 5-axis motion control, 
-            allowing for unprecedented geometric freedom and material efficiency.
+            Solar-powered and fully autonomous, the system learns plant requirements over time 
+            and adapts to changing environmental conditions for optimal garden management.
           </p>
         </motion.div>
 
@@ -168,13 +171,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Key Features</h2>
           <ul style={featureListStyle}>
-            <li style={featureItemStyle}>Simultaneous 5-axis motion control with real-time kinematics</li>
-            <li style={featureItemStyle}>Custom G-code interpreter for complex toolpaths</li>
-            <li style={featureItemStyle}>Real-time collision detection algorithms</li>
-            <li style={featureItemStyle}>Automatic calibration and bed leveling system</li>
-            <li style={featureItemStyle}>Multi-material printing capabilities</li>
-            <li style={featureItemStyle}>Support-free printing for complex geometries</li>
-            <li style={featureItemStyle}>Heated chamber for advanced materials</li>
+            <li style={featureItemStyle}>Multi-zone soil moisture and pH monitoring sensors</li>
+            <li style={featureItemStyle}>Automated drip irrigation with zone-specific control</li>
+            <li style={featureItemStyle}>Plant health analysis using computer vision and multispectral imaging</li>
+            <li style={featureItemStyle}>Weather prediction integration for irrigation scheduling</li>
+            <li style={featureItemStyle}>Mobile app with real-time garden status and alerts</li>
+            <li style={featureItemStyle}>Solar power system with rainwater collection integration</li>
+            <li style={featureItemStyle}>Machine learning optimization for water conservation</li>
           </ul>
         </motion.div>
 
@@ -186,16 +189,19 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Technical Specifications</h2>
           <p style={textStyle}>
-            <strong>Motion System:</strong> Custom Arduino-based control with stepper motor drivers
+            <strong>Control System:</strong> Raspberry Pi 4 with custom sensor interface board
           </p>
           <p style={textStyle}>
-            <strong>Print Volume:</strong> 200mm x 200mm x 150mm with full 5-axis accessibility
+            <strong>Irrigation:</strong> 8-zone drip system with solenoid valve control
           </p>
           <p style={textStyle}>
-            <strong>Layer Resolution:</strong> 0.05mm - 0.3mm variable layer heights
+            <strong>Sensors:</strong> Soil moisture, pH, temperature, light, and humidity arrays
           </p>
           <p style={textStyle}>
-            <strong>Materials:</strong> PLA, PETG, ABS, TPU, Carbon Fiber composites
+            <strong>Vision System:</strong> Raspberry Pi HQ camera with multispectral filters
+          </p>
+          <p style={textStyle}>
+            <strong>Power:</strong> 100W solar panel with battery backup and rain collection
           </p>
         </motion.div>
 
@@ -207,12 +213,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Current Status</h2>
           <p style={textStyle}>
-            Prototype complete with successful test prints demonstrating complex geometries. 
-            Currently optimizing slicing algorithms and refining motion control for production readiness.
+            Field testing in progress with impressive results: 40% water savings compared to 
+            traditional irrigation while improving plant health metrics. The AI system has learned 
+            optimal care patterns for 15 different plant species.
           </p>
           <p style={textStyle}>
-            <strong>Next Steps:</strong> Implementing advanced path planning algorithms and 
-            developing user-friendly slicing software.
+            <strong>Next Steps:</strong> Scaling to commercial greenhouse applications and 
+            integrating pest detection capabilities using computer vision and pheromone sensors.
           </p>
         </motion.div>
 
@@ -224,17 +231,17 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate(projectsHubTarget || 'projects')}
+            onClick={() => onNavigate('smaller-projects-hub')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
+              e.target.style.background = 'rgba(134, 239, 172, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(134, 239, 172, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
+              e.target.style.background = 'rgba(134, 239, 172, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            ← Back to Projects
+            ← Back to Smaller Projects
           </div>
         </motion.div>
       </motion.div>
@@ -242,4 +249,4 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   );
 };
 
-export default FiveAxisPrinter;
+export default AutonomousGarden;

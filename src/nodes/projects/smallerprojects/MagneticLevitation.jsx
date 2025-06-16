@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ParticleSystem from '../../components/ParticleSystem';
-import AmbientParticles from '../../components/AmbientParticles';
+import ParticleSystem from '../../../components/ParticleSystem';
+import AmbientParticles from '../../../components/AmbientParticles';
 
-const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
+const MagneticLevitation = ({ onNavigate }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a4a2e 0%, #0d2818 50%, #051a0d 100%)',
-    color: '#00ff88',
+    background: 'linear-gradient(135deg, #ea580c 0%, #f97316 50%, #fb923c 100%)',
+    color: '#fed7aa',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -35,9 +35,12 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   const containerStyle = {
     position: 'relative',
     zIndex: 10,
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '40px 20px'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: '40px'
   };
 
   const titleStyle = {
@@ -45,26 +48,26 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #00ff88',
-    background: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    color: '#fed7aa',
+    textShadow: '0 0 20px rgba(254, 215, 170, 0.5)'
   };
 
   const sectionStyle = {
-    marginBottom: '3rem',
-    background: 'rgba(0, 255, 136, 0.05)',
-    padding: '2rem',
+    backgroundColor: 'rgba(254, 215, 170, 0.1)',
     borderRadius: '15px',
-    border: '1px solid rgba(0, 255, 136, 0.2)'
+    padding: '2rem',
+    marginBottom: '2rem',
+    maxWidth: '800px',
+    width: '100%',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(254, 215, 170, 0.2)'
   };
 
   const sectionTitleStyle = {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
-    color: '#66ffaa'
+    color: '#fed7aa'
   };
 
   const textStyle = {
@@ -90,10 +93,10 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     display: 'inline-block',
     padding: '1rem 2rem',
     margin: '0.5rem',
-    border: '2px solid rgba(0, 255, 136, 0.5)',
+    border: '2px solid rgba(254, 215, 170, 0.5)',
     borderRadius: '12px',
-    background: 'rgba(0, 255, 136, 0.1)',
-    color: '#00ff88',
+    background: 'rgba(254, 215, 170, 0.1)',
+    color: '#fed7aa',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textDecoration: 'none',
@@ -116,14 +119,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
       
       <ParticleSystem 
         canvasRef={canvasRef}
-        particleColor="#00ff88"
+        particleColor="#fed7aa"
         particleCount={100}
-        speed={0.6}
+        speed={0.4}
       />
       
       <AmbientParticles 
         canvasRef={canvasRef}
-        color="#00ff88"
+        color="#fed7aa"
         opacity={0.3}
       />
 
@@ -139,7 +142,7 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          5-Axis 3D Printer
+          Electromagnetic Levitation Display
         </motion.h1>
 
         <motion.div 
@@ -150,13 +153,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Project Overview</h2>
           <p style={textStyle}>
-            Revolutionary 5-axis 3D printer that can rotate and tilt the print bed during printing, 
-            enabling complex overhangs and internal structures without support material. This advanced 
-            manufacturing system represents a breakthrough in additive manufacturing technology.
+            Electromagnetic levitation system designed to suspend small objects in mid-air using 
+            precisely controlled magnetic fields and real-time feedback control. This fascinating 
+            display creates the illusion of objects floating freely in space.
           </p>
           <p style={textStyle}>
-            The printer combines traditional FDM printing with CNC-style 5-axis motion control, 
-            allowing for unprecedented geometric freedom and material efficiency.
+            The system uses feedback control algorithms to maintain stable levitation of ferromagnetic 
+            objects, creating stunning visual displays for demonstrations, art installations, and 
+            educational purposes.
           </p>
         </motion.div>
 
@@ -168,13 +172,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Key Features</h2>
           <ul style={featureListStyle}>
-            <li style={featureItemStyle}>Simultaneous 5-axis motion control with real-time kinematics</li>
-            <li style={featureItemStyle}>Custom G-code interpreter for complex toolpaths</li>
-            <li style={featureItemStyle}>Real-time collision detection algorithms</li>
-            <li style={featureItemStyle}>Automatic calibration and bed leveling system</li>
-            <li style={featureItemStyle}>Multi-material printing capabilities</li>
-            <li style={featureItemStyle}>Support-free printing for complex geometries</li>
-            <li style={featureItemStyle}>Heated chamber for advanced materials</li>
+            <li style={featureItemStyle}>Precise electromagnetic field control with Hall sensor feedback</li>
+            <li style={featureItemStyle}>Real-time PID control algorithms for stable levitation</li>
+            <li style={featureItemStyle}>Multiple object levitation with independent control</li>
+            <li style={featureItemStyle}>Interactive control via gesture recognition and touch interface</li>
+            <li style={featureItemStyle}>LED lighting integration for dramatic visual effects</li>
+            <li style={featureItemStyle}>Sound-reactive levitation synchronized to music</li>
+            <li style={featureItemStyle}>Educational mode with physics visualization</li>
           </ul>
         </motion.div>
 
@@ -186,16 +190,22 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Technical Specifications</h2>
           <p style={textStyle}>
-            <strong>Motion System:</strong> Custom Arduino-based control with stepper motor drivers
+            <strong>Control System:</strong> Arduino Mega with custom electromagnet driver boards
           </p>
           <p style={textStyle}>
-            <strong>Print Volume:</strong> 200mm x 200mm x 150mm with full 5-axis accessibility
+            <strong>Sensors:</strong> Hall effect sensors with 0.1mm position resolution
           </p>
           <p style={textStyle}>
-            <strong>Layer Resolution:</strong> 0.05mm - 0.3mm variable layer heights
+            <strong>Electromagnets:</strong> Custom-wound coils with variable field strength
           </p>
           <p style={textStyle}>
-            <strong>Materials:</strong> PLA, PETG, ABS, TPU, Carbon Fiber composites
+            <strong>Update Rate:</strong> 1kHz control loop for stable levitation
+          </p>
+          <p style={textStyle}>
+            <strong>Levitation Range:</strong> Objects from 1g to 50g in a 200mm³ volume
+          </p>
+          <p style={textStyle}>
+            <strong>Power Supply:</strong> Switched-mode 24V system with current limiting
           </p>
         </motion.div>
 
@@ -207,12 +217,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Current Status</h2>
           <p style={textStyle}>
-            Prototype complete with successful test prints demonstrating complex geometries. 
-            Currently optimizing slicing algorithms and refining motion control for production readiness.
+            Successfully achieved stable levitation of small ferromagnetic objects with excellent 
+            position control. The system can maintain levitation for extended periods and responds 
+            dynamically to external disturbances.
           </p>
           <p style={textStyle}>
-            <strong>Next Steps:</strong> Implementing advanced path planning algorithms and 
-            developing user-friendly slicing software.
+            <strong>Next Steps:</strong> Implementing multi-object choreography, developing 
+            wireless power transmission for non-ferromagnetic objects, and creating artistic 
+            installation programming for galleries and museums.
           </p>
         </motion.div>
 
@@ -224,17 +236,17 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate(projectsHubTarget || 'projects')}
+            onClick={() => onNavigate('smaller-projects-hub')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
+              e.target.style.background = 'rgba(254, 215, 170, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(254, 215, 170, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
+              e.target.style.background = 'rgba(254, 215, 170, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            ← Back to Projects
+            ← Back to Smaller Projects
           </div>
         </motion.div>
       </motion.div>
@@ -242,4 +254,4 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   );
 };
 
-export default FiveAxisPrinter;
+export default MagneticLevitation;

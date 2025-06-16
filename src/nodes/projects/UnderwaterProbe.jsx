@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import ParticleSystem from '../../components/ParticleSystem';
 import AmbientParticles from '../../components/AmbientParticles';
 
-const UnderwaterProbe = ({ onNavigate }) => {
+const UnderwaterProbe = ({ onNavigate, projectsHubTarget }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -227,7 +227,7 @@ const UnderwaterProbe = ({ onNavigate }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate('projects')}
+            onClick={() => onNavigate(projectsHubTarget || 'projects')}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(77, 208, 225, 0.2)';
               e.target.style.boxShadow = '0 5px 15px rgba(77, 208, 225, 0.4)';

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import ParticleSystem from '../../components/ParticleSystem';
 import AmbientParticles from '../../components/AmbientParticles';
 
-const SmallerProjects = ({ onNavigate }) => {
+const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -118,27 +118,33 @@ const SmallerProjects = ({ onNavigate }) => {
 
   const smallerProjects = [
     {
+      id: 'iot-weather-station',
       title: 'IoT Weather Monitoring Station',
       description: 'Solar-powered weather station with real-time data logging and web dashboard. Monitors temperature, humidity, pressure, wind speed, and rainfall with wireless data transmission.'
     },
     {
+      id: 'gesture-drone-interface',
       title: 'Gesture-Controlled Drone Interface',
       description: 'Hand gesture recognition system for intuitive drone control using computer vision and machine learning. Enables natural piloting through hand movements and gestures.'
     },
     {
+      id: 'autonomous-garden',
       title: 'Autonomous Garden System',
       description: 'Smart irrigation and monitoring system with soil sensors, automated watering, and plant health tracking. Solar-powered with mobile app integration.'
     },
     {
+      id: 'holographic-display',
       title: 'Holographic Display Experiments',
       description: 'Research into volumetric displays using persistence of vision and LED arrays. Exploring 3D visualization techniques for data representation.'
     },
     {
-      title: 'Smart Home Automation Hub',
-      description: 'Central control system for home automation with voice control, mobile app, and AI-driven optimization. Integrates lighting, security, climate control.'
+      id: 'neural-network-music',
+      title: 'Neural Network Music Generator',
+      description: 'AI-powered music composition system using deep learning to generate original musical pieces across multiple genres with MIDI synthesis.'
     },
     {
-      title: 'Magnetic Levitation Display',
+      id: 'magnetic-levitation',
+      title: 'Electromagnetic Levitation Display',
       description: 'Electromagnetic levitation system for floating object displays. Uses feedback control to maintain stable levitation of small objects.'
     }
   ];
@@ -213,14 +219,27 @@ const SmallerProjects = ({ onNavigate }) => {
             {smallerProjects.map((project, index) => (
               <motion.div
                 key={index}
-                style={projectCardStyle}
+                style={{
+                  ...projectCardStyle,
+                  cursor: 'pointer'
+                }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
                 whileHover={{ scale: 1.02, borderColor: 'rgba(255, 171, 145, 0.5)' }}
+                onClick={() => onNavigate(project.id)}
               >
                 <div style={projectTitleStyle}>{project.title}</div>
                 <div style={projectDescStyle}>{project.description}</div>
+                <div style={{
+                  marginTop: '1rem',
+                  fontSize: '0.9rem',
+                  color: '#ffab91',
+                  fontStyle: 'italic',
+                  opacity: 0.8
+                }}>
+                  Click to explore →
+                </div>
               </motion.div>
             ))}
           </div>
@@ -290,7 +309,7 @@ const SmallerProjects = ({ onNavigate }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate('projects')}
+            onClick={() => onNavigate(projectsHubTarget || 'projects')}
             onMouseEnter={(e) => {
               e.target.style.background = 'rgba(255, 171, 145, 0.2)';
               e.target.style.boxShadow = '0 5px 15px rgba(255, 171, 145, 0.4)';

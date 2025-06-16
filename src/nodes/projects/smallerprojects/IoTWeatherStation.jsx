@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ParticleSystem from '../../components/ParticleSystem';
-import AmbientParticles from '../../components/AmbientParticles';
+import ParticleSystem from '../../../components/ParticleSystem';
+import AmbientParticles from '../../../components/AmbientParticles';
 
-const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
+const IoTWeatherStation = ({ onNavigate }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a4a2e 0%, #0d2818 50%, #051a0d 100%)',
-    color: '#00ff88',
+    background: 'linear-gradient(135deg, #0c4a6e 0%, #164e63 50%, #0891b2 100%)',
+    color: '#87ceeb',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -35,9 +35,12 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   const containerStyle = {
     position: 'relative',
     zIndex: 10,
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '40px 20px'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: '40px'
   };
 
   const titleStyle = {
@@ -45,26 +48,26 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #00ff88',
-    background: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    color: '#b3e5fc',
+    textShadow: '0 0 20px rgba(179, 229, 252, 0.5)'
   };
 
   const sectionStyle = {
-    marginBottom: '3rem',
-    background: 'rgba(0, 255, 136, 0.05)',
-    padding: '2rem',
+    backgroundColor: 'rgba(135, 206, 235, 0.1)',
     borderRadius: '15px',
-    border: '1px solid rgba(0, 255, 136, 0.2)'
+    padding: '2rem',
+    marginBottom: '2rem',
+    maxWidth: '800px',
+    width: '100%',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(135, 206, 235, 0.2)'
   };
 
   const sectionTitleStyle = {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
-    color: '#66ffaa'
+    color: '#b3e5fc'
   };
 
   const textStyle = {
@@ -90,10 +93,10 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     display: 'inline-block',
     padding: '1rem 2rem',
     margin: '0.5rem',
-    border: '2px solid rgba(0, 255, 136, 0.5)',
+    border: '2px solid rgba(135, 206, 235, 0.5)',
     borderRadius: '12px',
-    background: 'rgba(0, 255, 136, 0.1)',
-    color: '#00ff88',
+    background: 'rgba(135, 206, 235, 0.1)',
+    color: '#87ceeb',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textDecoration: 'none',
@@ -116,14 +119,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
       
       <ParticleSystem 
         canvasRef={canvasRef}
-        particleColor="#00ff88"
+        particleColor="#87ceeb"
         particleCount={100}
         speed={0.6}
       />
       
       <AmbientParticles 
         canvasRef={canvasRef}
-        color="#00ff88"
+        color="#87ceeb"
         opacity={0.3}
       />
 
@@ -139,7 +142,7 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          5-Axis 3D Printer
+          IoT Weather Monitoring Station
         </motion.h1>
 
         <motion.div 
@@ -150,13 +153,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Project Overview</h2>
           <p style={textStyle}>
-            Revolutionary 5-axis 3D printer that can rotate and tilt the print bed during printing, 
-            enabling complex overhangs and internal structures without support material. This advanced 
-            manufacturing system represents a breakthrough in additive manufacturing technology.
+            Solar-powered environmental monitoring station featuring comprehensive weather data collection 
+            and real-time web dashboard. This autonomous system monitors multiple atmospheric parameters 
+            and transmits data wirelessly for remote analysis and tracking.
           </p>
           <p style={textStyle}>
-            The printer combines traditional FDM printing with CNC-style 5-axis motion control, 
-            allowing for unprecedented geometric freedom and material efficiency.
+            The station combines renewable energy with IoT connectivity to provide continuous 
+            environmental monitoring capabilities for research, agriculture, and weather forecasting applications.
           </p>
         </motion.div>
 
@@ -168,13 +171,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Key Features</h2>
           <ul style={featureListStyle}>
-            <li style={featureItemStyle}>Simultaneous 5-axis motion control with real-time kinematics</li>
-            <li style={featureItemStyle}>Custom G-code interpreter for complex toolpaths</li>
-            <li style={featureItemStyle}>Real-time collision detection algorithms</li>
-            <li style={featureItemStyle}>Automatic calibration and bed leveling system</li>
-            <li style={featureItemStyle}>Multi-material printing capabilities</li>
-            <li style={featureItemStyle}>Support-free printing for complex geometries</li>
-            <li style={featureItemStyle}>Heated chamber for advanced materials</li>
+            <li style={featureItemStyle}>Real-time temperature, humidity, and barometric pressure monitoring</li>
+            <li style={featureItemStyle}>Wind speed and direction measurement with anemometer array</li>
+            <li style={featureItemStyle}>Rainfall detection and accumulation tracking</li>
+            <li style={featureItemStyle}>Solar radiation and UV index sensors</li>
+            <li style={featureItemStyle}>Wireless data transmission via LoRaWAN and cellular backup</li>
+            <li style={featureItemStyle}>Web dashboard with historical data visualization</li>
+            <li style={featureItemStyle}>Solar panel power system with battery backup</li>
           </ul>
         </motion.div>
 
@@ -186,16 +189,19 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Technical Specifications</h2>
           <p style={textStyle}>
-            <strong>Motion System:</strong> Custom Arduino-based control with stepper motor drivers
+            <strong>Control System:</strong> Arduino-based microcontroller with ESP32 for WiFi connectivity
           </p>
           <p style={textStyle}>
-            <strong>Print Volume:</strong> 200mm x 200mm x 150mm with full 5-axis accessibility
+            <strong>Power System:</strong> 20W solar panel with 12V lithium battery backup
           </p>
           <p style={textStyle}>
-            <strong>Layer Resolution:</strong> 0.05mm - 0.3mm variable layer heights
+            <strong>Data Collection:</strong> 5-minute interval sampling with 1-year data storage
           </p>
           <p style={textStyle}>
-            <strong>Materials:</strong> PLA, PETG, ABS, TPU, Carbon Fiber composites
+            <strong>Communication:</strong> LoRaWAN primary, 4G LTE cellular backup
+          </p>
+          <p style={textStyle}>
+            <strong>Weather Resistance:</strong> IP65 rated enclosure for outdoor deployment
           </p>
         </motion.div>
 
@@ -207,12 +213,12 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Current Status</h2>
           <p style={textStyle}>
-            Prototype complete with successful test prints demonstrating complex geometries. 
-            Currently optimizing slicing algorithms and refining motion control for production readiness.
+            Prototype testing completed with excellent accuracy compared to professional weather stations. 
+            The system has been operating continuously for 6 months with 99.8% uptime.
           </p>
           <p style={textStyle}>
-            <strong>Next Steps:</strong> Implementing advanced path planning algorithms and 
-            developing user-friendly slicing software.
+            <strong>Next Steps:</strong> Deploying additional stations for distributed monitoring network 
+            and integrating machine learning for predictive weather analysis.
           </p>
         </motion.div>
 
@@ -224,17 +230,17 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate(projectsHubTarget || 'projects')}
+            onClick={() => onNavigate('smaller-projects-hub')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
+              e.target.style.background = 'rgba(135, 206, 235, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(135, 206, 235, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
+              e.target.style.background = 'rgba(135, 206, 235, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            ← Back to Projects
+            ← Back to Smaller Projects
           </div>
         </motion.div>
       </motion.div>
@@ -242,4 +248,4 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   );
 };
 
-export default FiveAxisPrinter;
+export default IoTWeatherStation;

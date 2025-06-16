@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import ParticleSystem from '../../components/ParticleSystem';
-import AmbientParticles from '../../components/AmbientParticles';
+import ParticleSystem from '../../../components/ParticleSystem';
+import AmbientParticles from '../../../components/AmbientParticles';
 
-const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
+const NeuralNetworkMusic = ({ onNavigate }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -24,8 +24,8 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #1a4a2e 0%, #0d2818 50%, #051a0d 100%)',
-    color: '#00ff88',
+    background: 'linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #8b5cf6 100%)',
+    color: '#ddd6fe',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -35,9 +35,12 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   const containerStyle = {
     position: 'relative',
     zIndex: 10,
-    maxWidth: '1200px',
-    margin: '0 auto',
-    padding: '40px 20px'
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '100vh',
+    padding: '40px'
   };
 
   const titleStyle = {
@@ -45,26 +48,26 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #00ff88',
-    background: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88)',
-    backgroundClip: 'text',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent'
+    color: '#ddd6fe',
+    textShadow: '0 0 20px rgba(221, 214, 254, 0.5)'
   };
 
   const sectionStyle = {
-    marginBottom: '3rem',
-    background: 'rgba(0, 255, 136, 0.05)',
-    padding: '2rem',
+    backgroundColor: 'rgba(196, 181, 253, 0.1)',
     borderRadius: '15px',
-    border: '1px solid rgba(0, 255, 136, 0.2)'
+    padding: '2rem',
+    marginBottom: '2rem',
+    maxWidth: '800px',
+    width: '100%',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(196, 181, 253, 0.2)'
   };
 
   const sectionTitleStyle = {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
-    color: '#66ffaa'
+    color: '#ddd6fe'
   };
 
   const textStyle = {
@@ -90,10 +93,10 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
     display: 'inline-block',
     padding: '1rem 2rem',
     margin: '0.5rem',
-    border: '2px solid rgba(0, 255, 136, 0.5)',
+    border: '2px solid rgba(196, 181, 253, 0.5)',
     borderRadius: '12px',
-    background: 'rgba(0, 255, 136, 0.1)',
-    color: '#00ff88',
+    background: 'rgba(196, 181, 253, 0.1)',
+    color: '#c4b5fd',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     textDecoration: 'none',
@@ -116,14 +119,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
       
       <ParticleSystem 
         canvasRef={canvasRef}
-        particleColor="#00ff88"
-        particleCount={100}
-        speed={0.6}
+        particleColor="#c4b5fd"
+        particleCount={130}
+        speed={0.9}
       />
       
       <AmbientParticles 
         canvasRef={canvasRef}
-        color="#00ff88"
+        color="#c4b5fd"
         opacity={0.3}
       />
 
@@ -139,7 +142,7 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
           animate={{ scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          5-Axis 3D Printer
+          Neural Network Music Generator
         </motion.h1>
 
         <motion.div 
@@ -150,13 +153,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Project Overview</h2>
           <p style={textStyle}>
-            Revolutionary 5-axis 3D printer that can rotate and tilt the print bed during printing, 
-            enabling complex overhangs and internal structures without support material. This advanced 
-            manufacturing system represents a breakthrough in additive manufacturing technology.
+            AI-powered music composition system that uses deep learning neural networks to generate 
+            original musical compositions across multiple genres and styles. The system analyzes vast 
+            musical datasets to learn patterns and create entirely new compositions.
           </p>
           <p style={textStyle}>
-            The printer combines traditional FDM printing with CNC-style 5-axis motion control, 
-            allowing for unprecedented geometric freedom and material efficiency.
+            This experimental music generator explores the intersection of artificial intelligence 
+            and creative expression, producing unique MIDI compositions that can be rendered through 
+            various virtual instruments and synthesizers.
           </p>
         </motion.div>
 
@@ -168,13 +172,13 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Key Features</h2>
           <ul style={featureListStyle}>
-            <li style={featureItemStyle}>Simultaneous 5-axis motion control with real-time kinematics</li>
-            <li style={featureItemStyle}>Custom G-code interpreter for complex toolpaths</li>
-            <li style={featureItemStyle}>Real-time collision detection algorithms</li>
-            <li style={featureItemStyle}>Automatic calibration and bed leveling system</li>
-            <li style={featureItemStyle}>Multi-material printing capabilities</li>
-            <li style={featureItemStyle}>Support-free printing for complex geometries</li>
-            <li style={featureItemStyle}>Heated chamber for advanced materials</li>
+            <li style={featureItemStyle}>Multi-genre neural network training (classical, jazz, electronic, rock)</li>
+            <li style={featureItemStyle}>Real-time MIDI composition with customizable parameters</li>
+            <li style={featureItemStyle}>Style transfer capabilities between different musical genres</li>
+            <li style={featureItemStyle}>Interactive web interface for composition control</li>
+            <li style={featureItemStyle}>Integration with popular DAWs and MIDI hardware</li>
+            <li style={featureItemStyle}>Emotion-based composition using sentiment analysis</li>
+            <li style={featureItemStyle}>Collaborative human-AI composition tools</li>
           </ul>
         </motion.div>
 
@@ -186,16 +190,19 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Technical Specifications</h2>
           <p style={textStyle}>
-            <strong>Motion System:</strong> Custom Arduino-based control with stepper motor drivers
+            <strong>Neural Architecture:</strong> Transformer-based model with attention mechanisms
           </p>
           <p style={textStyle}>
-            <strong>Print Volume:</strong> 200mm x 200mm x 150mm with full 5-axis accessibility
+            <strong>Training Data:</strong> 50,000+ MIDI files across multiple genres and decades
           </p>
           <p style={textStyle}>
-            <strong>Layer Resolution:</strong> 0.05mm - 0.3mm variable layer heights
+            <strong>Processing Power:</strong> NVIDIA RTX 4090 for model training and inference
           </p>
           <p style={textStyle}>
-            <strong>Materials:</strong> PLA, PETG, ABS, TPU, Carbon Fiber composites
+            <strong>Output Format:</strong> MIDI, WAV, and direct DAW integration
+          </p>
+          <p style={textStyle}>
+            <strong>Interface:</strong> Web-based GUI with real-time parameter adjustment
           </p>
         </motion.div>
 
@@ -207,12 +214,14 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Current Status</h2>
           <p style={textStyle}>
-            Prototype complete with successful test prints demonstrating complex geometries. 
-            Currently optimizing slicing algorithms and refining motion control for production readiness.
+            The system successfully generates musically coherent compositions with impressive 
+            stylistic consistency. Early testing shows 78% of listeners cannot distinguish 
+            AI-generated pieces from human compositions in blind tests.
           </p>
           <p style={textStyle}>
-            <strong>Next Steps:</strong> Implementing advanced path planning algorithms and 
-            developing user-friendly slicing software.
+            <strong>Next Steps:</strong> Implementing real-time performance capabilities, 
+            adding voice synthesis, and developing a collaborative platform for musicians 
+            to work alongside AI composition tools.
           </p>
         </motion.div>
 
@@ -224,17 +233,17 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
         >
           <div
             style={navBoxStyle}
-            onClick={() => onNavigate(projectsHubTarget || 'projects')}
+            onClick={() => onNavigate('smaller-projects-hub')}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(0, 255, 136, 0.4)';
+              e.target.style.background = 'rgba(196, 181, 253, 0.2)';
+              e.target.style.boxShadow = '0 5px 15px rgba(196, 181, 253, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(0, 255, 136, 0.1)';
+              e.target.style.background = 'rgba(196, 181, 253, 0.1)';
               e.target.style.boxShadow = 'none';
             }}
           >
-            ← Back to Projects
+            ← Back to Smaller Projects
           </div>
         </motion.div>
       </motion.div>
@@ -242,4 +251,4 @@ const FiveAxisPrinter = ({ onNavigate, projectsHubTarget }) => {
   );
 };
 
-export default FiveAxisPrinter;
+export default NeuralNetworkMusic;

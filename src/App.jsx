@@ -12,6 +12,12 @@ import UnderwaterProbe from './nodes/projects/UnderwaterProbe';
 import PiezoMicroscope from './nodes/projects/PiezoMicroscope';
 import PersonalSubmarine from './nodes/projects/PersonalSubmarine';
 import SmallerProjects from './nodes/projects/SmallerProjects';
+import IoTWeatherStation from './nodes/projects/smallerprojects/IoTWeatherStation';
+import GestureDroneInterface from './nodes/projects/smallerprojects/GestureDroneInterface';
+import AutonomousGarden from './nodes/projects/smallerprojects/AutonomousGarden';
+import HolographicDisplay from './nodes/projects/smallerprojects/HolographicDisplay';
+import NeuralNetworkMusic from './nodes/projects/smallerprojects/NeuralNetworkMusic';
+import MagneticLevitation from './nodes/projects/smallerprojects/MagneticLevitation';
 
 const memoryGraph = {
   nodes: {
@@ -58,7 +64,41 @@ const memoryGraph = {
       id: 'engineering',
       title: 'Engineering Cosmos',
       theme: 'tech',
-      content: 'The mechanical universe where logic meets creativity...'
+      content: 'The mechanical universe where logic meets creativity...',
+      subGraph: {
+        nodes: {
+          'engineering-hub': {
+            id: 'engineering-hub',
+            title: 'Engineering Cosmos',
+            theme: 'tech',
+            content: 'The mechanical universe where logic meets creativity...'
+          },
+          'mech-design': {
+            id: 'mech-design',
+            title: 'Mechanical Design',
+            theme: 'tech',
+            content: 'CAD, 3D modeling, and mechanical engineering workflows'
+          },
+          'electronics': {
+            id: 'electronics',
+            title: 'Electronics',
+            theme: 'tech',
+            content: 'Circuit design, embedded systems, and electronic prototyping'
+          },
+          'software': {
+            id: 'software',
+            title: 'Software',
+            theme: 'tech',
+            content: 'Programming, algorithms, and software architecture'
+          }
+        },
+        edges: {
+          'engineering-hub': ['mech-design', 'electronics', 'software'],
+          'mech-design': ['engineering-hub', 'electronics', 'software'],
+          'electronics': ['engineering-hub', 'mech-design', 'software'],
+          'software': ['engineering-hub', 'mech-design', 'electronics']
+        }
+      }
     },
     memories: {
       id: 'memories',
@@ -107,7 +147,62 @@ const memoryGraph = {
             id: 'smaller-projects',
             title: 'Smaller Projects Collection',
             theme: 'orange',
-            content: 'Diverse portfolio of experimental projects and innovations'
+            content: 'Diverse portfolio of experimental projects and innovations',
+            subGraph: {
+              nodes: {
+                'smaller-projects-hub': {
+                  id: 'smaller-projects-hub',
+                  title: 'Smaller Projects Collection',
+                  theme: 'orange',
+                  content: 'Diverse portfolio of experimental projects and innovations'
+                },
+                'iot-weather-station': {
+                  id: 'iot-weather-station',
+                  title: 'IoT Weather Monitoring Station',
+                  theme: 'blue',
+                  content: 'Solar-powered weather station with real-time data logging and web dashboard'
+                },
+                'gesture-drone-interface': {
+                  id: 'gesture-drone-interface',
+                  title: 'Gesture-Controlled Drone Interface',
+                  theme: 'purple',
+                  content: 'Hand gesture recognition system for intuitive drone control using computer vision'
+                },
+                'autonomous-garden': {
+                  id: 'autonomous-garden',
+                  title: 'Autonomous Garden System',
+                  theme: 'green',
+                  content: 'Smart irrigation and monitoring system with AI-driven plant health optimization'
+                },
+                'holographic-display': {
+                  id: 'holographic-display',
+                  title: 'Holographic Display Experiments',
+                  theme: 'cyan',
+                  content: 'Research into volumetric displays using persistence of vision and LED arrays'
+                },
+                'neural-network-music': {
+                  id: 'neural-network-music',
+                  title: 'Neural Network Music Generator',
+                  theme: 'purple',
+                  content: 'AI-powered music composition system using deep learning and MIDI synthesis'
+                },
+                'magnetic-levitation': {
+                  id: 'magnetic-levitation',
+                  title: 'Electromagnetic Levitation Display',
+                  theme: 'orange',
+                  content: 'Electromagnetic levitation system for floating object displays with feedback control'
+                }
+              },
+              edges: {
+                'smaller-projects-hub': ['iot-weather-station', 'gesture-drone-interface', 'autonomous-garden', 'holographic-display', 'neural-network-music', 'magnetic-levitation'],
+                'iot-weather-station': ['smaller-projects-hub'],
+                'gesture-drone-interface': ['smaller-projects-hub'],
+                'autonomous-garden': ['smaller-projects-hub'],
+                'holographic-display': ['smaller-projects-hub'],
+                'neural-network-music': ['smaller-projects-hub'],
+                'magnetic-levitation': ['smaller-projects-hub']
+              }
+            }
           }
         },
         edges: {
@@ -147,11 +242,47 @@ const MyUniverse = () => {
   });
 
   const navigate = (nodeId) => {
-    // Check if we're navigating within current graph level
+    // First, check if target node exists in current graph level
     if (currentGraphLevel.nodes[nodeId]) {
-      // Direct navigation without transition screen for smoother menu experience
       setCurrentNode(nodeId);
+      return;
     }
+
+    // If not found in current level, search all graph levels for the target node
+    // Check main graph
+    if (memoryGraph.nodes[nodeId]) {
+      // If we're in a subgraph, exit to main graph first
+      if (navigationPath.length > 1) {
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setNavigationPath(['root']);
+          setCurrentGraphLevel(memoryGraph);
+          setCurrentNode(nodeId);
+          setIsTransitioning(false);
+        }, 300);
+      } else {
+        setCurrentNode(nodeId);
+      }
+      return;
+    }
+
+    // Check all subgraphs for the target node
+    for (const [parentNodeId, parentNode] of Object.entries(memoryGraph.nodes)) {
+      if (parentNode.subGraph && parentNode.subGraph.nodes[nodeId]) {
+        // Found in a subgraph - navigate there
+        setIsTransitioning(true);
+        setTimeout(() => {
+          setNavigationPath(['root', parentNodeId]);
+          setCurrentGraphLevel(parentNode.subGraph);
+          setCurrentNode(nodeId);
+          setIsTransitioning(false);
+        }, 300);
+        return;
+      }
+    }
+
+    // If node not found anywhere, log warning
+    console.warn(`Navigation target '${nodeId}' not found in any graph level`);
   };
 
   const enterSubGraph = (nodeId) => {
@@ -311,6 +442,16 @@ const MyUniverse = () => {
     }
   };
         
+  // Helper function to determine the correct projects hub navigation target
+  const getProjectsHubTarget = () => {
+    // If we're currently in the projects subgraph (navigationPath length > 1 and current graph level has projects-hub)
+    if (navigationPath.length > 1 && currentGraphLevel.nodes && currentGraphLevel.nodes['projects-hub']) {
+      return 'projects-hub';
+    }
+    // Otherwise, we're in the main graph level, so return 'projects'
+    return 'projects';
+  };
+
   const renderCurrentNode = () => {
     switch (currentNode) {
       case 'start':
@@ -321,6 +462,7 @@ const MyUniverse = () => {
           <TechnoUniverseNight onNavigate={navigate} onToggleTime={toggleTime} /> :
           <TechnoUniverseDay onNavigate={navigate} onToggleTime={toggleTime} />;
       case 'engineering':
+      case 'engineering-hub':
         return <EngineeringNode onNavigate={navigate} />;
       case 'memories':
         return <MemoryNode onNavigate={navigate} />;
@@ -328,15 +470,28 @@ const MyUniverse = () => {
       case 'projects-hub':
         return <ProjectsNode onNavigate={navigate} />;
       case 'five-axis-printer':
-        return <FiveAxisPrinter onNavigate={navigate} />;
+        return <FiveAxisPrinter onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
       case 'underwater-probe':
-        return <UnderwaterProbe onNavigate={navigate} />;
+        return <UnderwaterProbe onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
       case 'piezo-microscope':
-        return <PiezoMicroscope onNavigate={navigate} />;
+        return <PiezoMicroscope onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
       case 'personal-submarine':
-        return <PersonalSubmarine onNavigate={navigate} />;
+        return <PersonalSubmarine onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
       case 'smaller-projects':
-        return <SmallerProjects onNavigate={navigate} />;
+      case 'smaller-projects-hub':
+        return <SmallerProjects onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+      case 'iot-weather-station':
+        return <IoTWeatherStation onNavigate={navigate} />;
+      case 'gesture-drone-interface':
+        return <GestureDroneInterface onNavigate={navigate} />;
+      case 'autonomous-garden':
+        return <AutonomousGarden onNavigate={navigate} />;
+      case 'holographic-display':
+        return <HolographicDisplay onNavigate={navigate} />;
+      case 'neural-network-music':
+        return <NeuralNetworkMusic onNavigate={navigate} />;
+      case 'magnetic-levitation':
+        return <MagneticLevitation onNavigate={navigate} />;
       // Handle sub-graph nodes with generic node renderer
       default:
         return renderSubGraphNode();
