@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { getDestinationThemeColors } from '../utils/themeUtils';
 
 const MemoryNode = ({ onNavigate }) => {
-  const containerStyle = {
+  // Memoized styles to prevent recreation
+  const containerStyle = useMemo(() => ({
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #581c87, #be185d)',
     color: 'white',
@@ -11,16 +13,16 @@ const MemoryNode = ({ onNavigate }) => {
     justifyContent: 'center',
     position: 'relative',
     overflow: 'hidden'
-  };
+  }), []);
 
-  const contentStyle = {
+  const contentStyle = useMemo(() => ({
     maxWidth: '896px',
     margin: '0 auto',
     padding: '32px',
     textAlign: 'center'
-  };
+  }), []);
 
-  const titleStyle = {
+  const titleStyle = useMemo(() => ({
     fontSize: '72px',
     fontWeight: 'bold',
     marginBottom: '24px',
@@ -28,18 +30,17 @@ const MemoryNode = ({ onNavigate }) => {
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     color: 'transparent'
-  };
+  }), []);
 
-  const textStyle = {
+  const textStyle = useMemo(() => ({
     fontSize: '20px',
     color: '#e9d5ff',
     marginBottom: '48px',
     lineHeight: 1.6
-  };
+  }), []);
 
-  const buttonStyle = {
+  const baseButtonStyle = useMemo(() => ({
     padding: '16px 32px',
-    backgroundColor: '#8b5cf6',
     color: 'white',
     fontWeight: 'bold',
     borderRadius: '8px',
@@ -47,14 +48,23 @@ const MemoryNode = ({ onNavigate }) => {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     margin: '0 8px'
-  };
+  }), []);
 
-  const navigationStyle = {
+  const navigationStyle = useMemo(() => ({
     display: 'flex',
     justifyContent: 'center',
     gap: '16px',
     flexWrap: 'wrap'
-  };
+  }), []);
+
+  // Memoized navigation handlers
+  const handleTechnoNavigation = useCallback(() => {
+    onNavigate('techno');
+  }, [onNavigate]);
+
+  const handleProjectsNavigation = useCallback(() => {
+    onNavigate('projects');
+  }, [onNavigate]);
 
   return (
     <motion.div
@@ -89,19 +99,35 @@ const MemoryNode = ({ onNavigate }) => {
           transition={{ delay: 0.7 }}
         >
           <motion.button
-            style={buttonStyle}
-            whileHover={{ scale: 1.05, backgroundColor: '#a78bfa' }}
+            style={{
+              ...baseButtonStyle, 
+              backgroundColor: getDestinationThemeColors('techno').primary,
+              border: `2px solid ${getDestinationThemeColors('techno').border}`
+            }}
+            whileHover={{ 
+              scale: 1.05, 
+              backgroundColor: getDestinationThemeColors('techno').secondary,
+              boxShadow: `0 5px 15px ${getDestinationThemeColors('techno').shadow}`
+            }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('techno')}
+            onClick={handleTechnoNavigation}
           >
             ← Return to My Universe
           </motion.button>
-
+          
           <motion.button
-            style={{...buttonStyle, backgroundColor: '#059669'}}
-            whileHover={{ scale: 1.05, backgroundColor: '#10b981' }}
+            style={{
+              ...baseButtonStyle, 
+              backgroundColor: getDestinationThemeColors('projects').primary,
+              border: `2px solid ${getDestinationThemeColors('projects').border}`
+            }}
+            whileHover={{ 
+              scale: 1.05, 
+              backgroundColor: getDestinationThemeColors('projects').secondary,
+              boxShadow: `0 5px 15px ${getDestinationThemeColors('projects').shadow}`
+            }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => onNavigate('projects')}
+            onClick={handleProjectsNavigation}
           >
             Explore My Projects →
           </motion.button>
@@ -111,4 +137,4 @@ const MemoryNode = ({ onNavigate }) => {
   );
 };
 
-export default MemoryNode;
+export default React.memo(MemoryNode);

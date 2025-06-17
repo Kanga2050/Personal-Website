@@ -21,10 +21,7 @@ const SceneObject = ({ x, y, size, color, onClick, children, hoverEffect = "puls
     alignItems: 'center',
     justifyContent: 'center',
     transition: 'all 0.3s ease',
-    boxShadow: isHovered ? 
-      (color.includes('blue') ? '0 0 20px #3b82f6' : 
-       color.includes('purple') ? '0 0 20px #8b5cf6' : 
-       '0 0 20px #f59e0b') : 'none'
+    boxShadow: isHovered ? `0 0 20px ${color}` : 'none'
   };
 
   const ringStyle = {

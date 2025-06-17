@@ -2,8 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AmbientParticles from '../../components/AmbientParticles';
 import SceneObject from '../../components/SceneObject';
+import { getSiteReference } from '../../theme/universalTheme';
 
 const TechnoUniverseDay = ({ onNavigate, onToggleTime }) => {
+  // Get destination themes for cross-site navigation
+  const engineeringRef = getSiteReference('engineering');
+  const memoriesRef = getSiteReference('memories');
+  const projectsRef = getSiteReference('projects');
+
   const containerStyle = {
     minHeight: '100vh',
     background: 'linear-gradient(135deg, #92400e, #b45309, #ea580c)',
@@ -180,7 +186,7 @@ const TechnoUniverseDay = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={20} y={45}
           size="64px"
-          color="linear-gradient(135deg, #3b82f6, #06b6d4)"
+          color={engineeringRef.theme.colors.backgroundSolid}
           onClick={() => onNavigate('engineering')}
         >
           <motion.div
@@ -195,7 +201,7 @@ const TechnoUniverseDay = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={75} y={65}
           size="56px"
-          color="linear-gradient(135deg, #8b5cf6, #ec4899)"
+          color={memoriesRef.theme.colors.backgroundSolid}
           onClick={() => onNavigate('memories')}
           hoverEffect="glow"
         >
@@ -211,7 +217,7 @@ const TechnoUniverseDay = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={50} y={20}
           size="60px"
-          color="linear-gradient(135deg, #059669, #10b981)"
+          color={projectsRef.theme.colors.backgroundSolid}
           onClick={() => onNavigate('projects')}
           hoverEffect="pulse"
         >

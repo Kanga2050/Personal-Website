@@ -2,9 +2,13 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import ParticleSystem from '../../components/ParticleSystem';
 import AmbientParticles from '../../components/AmbientParticles';
+import { createDestinationStyledHandler, getThemeColorPalette } from '../../utils/themeUtils';
 
 const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
   const canvasRef = useRef(null);
+
+  // Get orange theme colors for this component
+  const themeColors = getThemeColorPalette('orange');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -24,7 +28,7 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #bf360c 0%, #d84315 50%, #ff5722 100%)',
+    background: 'linear-gradient(135deg, #9a3412, #c2410c)', // Orange gradient to match App.jsx
     color: '#ffab91',
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
@@ -45,8 +49,8 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
     fontWeight: 'bold',
     marginBottom: '2rem',
     textAlign: 'center',
-    textShadow: '0 0 20px #ffab91',
-    background: 'linear-gradient(45deg, #ffab91, #ffccbc, #ffab91)',
+    textShadow: `0 0 20px ${themeColors.primary}`,
+    background: `linear-gradient(45deg, ${themeColors.primary}, ${themeColors.secondary}, ${themeColors.primary})`,
     backgroundClip: 'text',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent'
@@ -54,24 +58,27 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
 
   const sectionStyle = {
     marginBottom: '3rem',
-    background: 'rgba(255, 171, 145, 0.05)',
+    background: `${themeColors.background}`,
     padding: '2rem',
     borderRadius: '15px',
-    border: '1px solid rgba(255, 171, 145, 0.2)'
+    border: `1px solid ${themeColors.border}`,
+    backdropFilter: 'blur(10px)',
+    boxShadow: `0 4px 15px ${themeColors.shadow}`
   };
 
   const sectionTitleStyle = {
     fontSize: '1.8rem',
     fontWeight: 'bold',
     marginBottom: '1rem',
-    color: '#ffccbc'
+    color: themeColors.secondary
   };
 
   const textStyle = {
     fontSize: '1.1rem',
     lineHeight: '1.7',
     marginBottom: '1rem',
-    opacity: 0.9
+    opacity: 0.9,
+    color: themeColors.secondary
   };
 
   const projectGridStyle = {
@@ -82,17 +89,19 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
   };
 
   const projectCardStyle = {
-    background: 'rgba(255, 171, 145, 0.1)',
+    background: themeColors.background,
     padding: '1.5rem',
     borderRadius: '12px',
-    border: '1px solid rgba(255, 171, 145, 0.3)'
+    border: `1px solid ${themeColors.border}`,
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease'
   };
 
   const projectTitleStyle = {
     fontSize: '1.3rem',
     fontWeight: 'bold',
     marginBottom: '0.8rem',
-    color: '#ffccbc'
+    color: themeColors.secondary
   };
 
   const projectDescStyle = {
@@ -120,32 +129,38 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
     {
       id: 'iot-weather-station',
       title: 'IoT Weather Monitoring Station',
-      description: 'Solar-powered weather station with real-time data logging and web dashboard. Monitors temperature, humidity, pressure, wind speed, and rainfall with wireless data transmission.'
+      description: 'Solar-powered weather station with real-time data logging and web dashboard. Monitors temperature, humidity, pressure, wind speed, and rainfall with wireless data transmission.',
+      theme: 'blue'
     },
     {
       id: 'gesture-drone-interface',
       title: 'Gesture-Controlled Drone Interface',
-      description: 'Hand gesture recognition system for intuitive drone control using computer vision and machine learning. Enables natural piloting through hand movements and gestures.'
+      description: 'Hand gesture recognition system for intuitive drone control using computer vision and machine learning. Enables natural piloting through hand movements and gestures.',
+      theme: 'purple'
     },
     {
       id: 'autonomous-garden',
       title: 'Autonomous Garden System',
-      description: 'Smart irrigation and monitoring system with soil sensors, automated watering, and plant health tracking. Solar-powered with mobile app integration.'
+      description: 'Smart irrigation and monitoring system with soil sensors, automated watering, and plant health tracking. Solar-powered with mobile app integration.',
+      theme: 'green'
     },
     {
       id: 'holographic-display',
       title: 'Holographic Display Experiments',
-      description: 'Research into volumetric displays using persistence of vision and LED arrays. Exploring 3D visualization techniques for data representation.'
+      description: 'Research into volumetric displays using persistence of vision and LED arrays. Exploring 3D visualization techniques for data representation.',
+      theme: 'cyan'
     },
     {
       id: 'neural-network-music',
       title: 'Neural Network Music Generator',
-      description: 'AI-powered music composition system using deep learning to generate original musical pieces across multiple genres with MIDI synthesis.'
+      description: 'AI-powered music composition system using deep learning to generate original musical pieces across multiple genres with MIDI synthesis.',
+      theme: 'purple'
     },
     {
       id: 'magnetic-levitation',
       title: 'Electromagnetic Levitation Display',
-      description: 'Electromagnetic levitation system for floating object displays. Uses feedback control to maintain stable levitation of small objects.'
+      description: 'Electromagnetic levitation system for floating object displays. Uses feedback control to maintain stable levitation of small objects.',
+      theme: 'orange'
     }
   ];
 
@@ -216,32 +231,52 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
         >
           <h2 style={sectionTitleStyle}>Active Projects</h2>
           <div style={projectGridStyle}>
-            {smallerProjects.map((project, index) => (
-              <motion.div
-                key={index}
-                style={{
-                  ...projectCardStyle,
-                  cursor: 'pointer'
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-                whileHover={{ scale: 1.02, borderColor: 'rgba(255, 171, 145, 0.5)' }}
-                onClick={() => onNavigate(project.id)}
-              >
-                <div style={projectTitleStyle}>{project.title}</div>
-                <div style={projectDescStyle}>{project.description}</div>
-                <div style={{
-                  marginTop: '1rem',
-                  fontSize: '0.9rem',
-                  color: '#ffab91',
-                  fontStyle: 'italic',
-                  opacity: 0.8
-                }}>
-                  Click to explore →
-                </div>
-              </motion.div>
-            ))}
+            {smallerProjects.map((project, index) => {
+              const projectTheme = getThemeColorPalette(project.theme);
+              return (
+                <motion.div
+                  key={index}
+                  style={{
+                    ...projectCardStyle,
+                    background: projectTheme.background,
+                    border: `1px solid ${projectTheme.border}`,
+                    cursor: 'pointer'
+                  }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.02, 
+                    borderColor: projectTheme.primary,
+                    boxShadow: `0 8px 25px ${projectTheme.shadow}`
+                  }}
+                  onClick={() => onNavigate(project.id)}
+                >
+                  <div style={{
+                    ...projectTitleStyle,
+                    color: projectTheme.primary
+                  }}>
+                    {project.title}
+                  </div>
+                  <div style={{
+                    ...projectDescStyle,
+                    color: projectTheme.secondary,
+                    opacity: 0.9
+                  }}>
+                    {project.description}
+                  </div>
+                  <div style={{
+                    marginTop: '1rem',
+                    fontSize: '0.9rem',
+                    color: projectTheme.secondary,
+                    fontStyle: 'italic',
+                    opacity: 0.8
+                  }}>
+                    Click to explore →
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </motion.div>
 
@@ -308,16 +343,13 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
           transition={{ duration: 0.8, delay: 1.6 }}
         >
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('projects').style
+            }}
             onClick={() => onNavigate(projectsHubTarget || 'projects')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 171, 145, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(255, 171, 145, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255, 171, 145, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={createDestinationStyledHandler('projects').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('projects').onMouseLeave}
           >
             ← Back to Projects
           </div>

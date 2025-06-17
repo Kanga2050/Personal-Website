@@ -1,23 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import StartNode from './nodes/StartNode';
-import TechnoUniverseDay from './nodes/technouniverse/TechnoUniverseDay';
-import TechnoUniverseNight from './nodes/technouniverse/TechnoUniverseNight';
-import EngineeringNode from './nodes/EngineeringNode';
-import MemoryNode from './nodes/MemoryNode';
-import ProjectsNode from './nodes/ProjectsNode';
-import NavigationMenu from './components/NavigationMenu';
-import FiveAxisPrinter from './nodes/projects/FiveAxisPrinter';
-import UnderwaterProbe from './nodes/projects/UnderwaterProbe';
-import PiezoMicroscope from './nodes/projects/PiezoMicroscope';
-import PersonalSubmarine from './nodes/projects/PersonalSubmarine';
-import SmallerProjects from './nodes/projects/SmallerProjects';
-import IoTWeatherStation from './nodes/projects/smallerprojects/IoTWeatherStation';
-import GestureDroneInterface from './nodes/projects/smallerprojects/GestureDroneInterface';
-import AutonomousGarden from './nodes/projects/smallerprojects/AutonomousGarden';
-import HolographicDisplay from './nodes/projects/smallerprojects/HolographicDisplay';
-import NeuralNetworkMusic from './nodes/projects/smallerprojects/NeuralNetworkMusic';
-import MagneticLevitation from './nodes/projects/smallerprojects/MagneticLevitation';
+import ErrorBoundary from './components/ErrorBoundary';
+import PerformanceMonitor from './components/PerformanceMonitor';
+
+// Lazy load components for better performance
+const StartNode = lazy(() => import('./nodes/StartNode'));
+const TechnoUniverseDay = lazy(() => import('./nodes/technouniverse/TechnoUniverseDay'));
+const TechnoUniverseNight = lazy(() => import('./nodes/technouniverse/TechnoUniverseNight'));
+const EngineeringNode = lazy(() => import('./nodes/EngineeringNode'));
+const MemoryNode = lazy(() => import('./nodes/MemoryNode'));
+const ProjectsNode = lazy(() => import('./nodes/ProjectsNode'));
+const NavigationMenu = lazy(() => import('./components/NavigationMenu'));
+const FiveAxisPrinter = lazy(() => import('./nodes/projects/FiveAxisPrinter'));
+const UnderwaterProbe = lazy(() => import('./nodes/projects/UnderwaterProbe'));
+const PiezoMicroscope = lazy(() => import('./nodes/projects/PiezoMicroscope'));
+const PersonalSubmarine = lazy(() => import('./nodes/projects/PersonalSubmarine'));
+const SmallerProjects = lazy(() => import('./nodes/projects/SmallerProjects'));
+const IoTWeatherStation = lazy(() => import('./nodes/projects/smallerprojects/IoTWeatherStation'));
+const GestureDroneInterface = lazy(() => import('./nodes/projects/smallerprojects/GestureDroneInterface'));
+const AutonomousGarden = lazy(() => import('./nodes/projects/smallerprojects/AutonomousGarden'));
+const HolographicDisplay = lazy(() => import('./nodes/projects/smallerprojects/HolographicDisplay'));
+const NeuralNetworkMusic = lazy(() => import('./nodes/projects/smallerprojects/NeuralNetworkMusic'));
+const MagneticLevitation = lazy(() => import('./nodes/projects/smallerprojects/MagneticLevitation'));
 
 const memoryGraph = {
   nodes: {
@@ -76,19 +80,19 @@ const memoryGraph = {
           'mech-design': {
             id: 'mech-design',
             title: 'Mechanical Design',
-            theme: 'tech',
+            theme: 'mech-blue',
             content: 'CAD, 3D modeling, and mechanical engineering workflows'
           },
           'electronics': {
             id: 'electronics',
             title: 'Electronics',
-            theme: 'tech',
+            theme: 'electric-orange',
             content: 'Circuit design, embedded systems, and electronic prototyping'
           },
           'software': {
             id: 'software',
             title: 'Software',
-            theme: 'tech',
+            theme: 'code-green',
             content: 'Programming, algorithms, and software architecture'
           }
         },
@@ -234,14 +238,15 @@ const MyUniverse = () => {
   const [navigationPath, setNavigationPath] = useState(['root']); // Track path through graph levels
   const [currentGraphLevel, setCurrentGraphLevel] = useState(memoryGraph); // Current graph being displayed
   
-  // Initialize night mode based on current time of day
+  // Initialize night mode based on current time of day - memoized to prevent recalculation
   const [isNightMode, setIsNightMode] = useState(() => {
     const currentHour = new Date().getHours();
     // Night mode from 6 PM (18:00) to 6 AM (6:00)
     return currentHour >= 18 || currentHour < 6;
   });
 
-  const navigate = (nodeId) => {
+  // Memoized navigation function to prevent unnecessary re-renders
+  const navigate = useCallback((nodeId) => {
     // First, check if target node exists in current graph level
     if (currentGraphLevel.nodes[nodeId]) {
       setCurrentNode(nodeId);
@@ -254,12 +259,15 @@ const MyUniverse = () => {
       // If we're in a subgraph, exit to main graph first
       if (navigationPath.length > 1) {
         setIsTransitioning(true);
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           setNavigationPath(['root']);
           setCurrentGraphLevel(memoryGraph);
           setCurrentNode(nodeId);
           setIsTransitioning(false);
         }, 300);
+        
+        // Cleanup timeout to prevent memory leaks
+        return () => clearTimeout(timeoutId);
       } else {
         setCurrentNode(nodeId);
       }
@@ -271,25 +279,27 @@ const MyUniverse = () => {
       if (parentNode.subGraph && parentNode.subGraph.nodes[nodeId]) {
         // Found in a subgraph - navigate there
         setIsTransitioning(true);
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           setNavigationPath(['root', parentNodeId]);
           setCurrentGraphLevel(parentNode.subGraph);
           setCurrentNode(nodeId);
           setIsTransitioning(false);
         }, 300);
-        return;
+        
+        // Cleanup timeout to prevent memory leaks
+        return () => clearTimeout(timeoutId);
       }
     }
 
     // If node not found anywhere, log warning
     console.warn(`Navigation target '${nodeId}' not found in any graph level`);
-  };
+  }, [currentGraphLevel, navigationPath]);
 
-  const enterSubGraph = (nodeId) => {
+  const enterSubGraph = useCallback((nodeId) => {
     const node = currentGraphLevel.nodes[nodeId];
     if (node && node.subGraph) {
       setIsTransitioning(true);
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         // Enter the sub-graph
         setNavigationPath(prev => [...prev, nodeId]);
         setCurrentGraphLevel(node.subGraph);
@@ -301,13 +311,16 @@ const MyUniverse = () => {
         setCurrentNode(startingNodeId);
         setIsTransitioning(false);
       }, 300);
+      
+      // Cleanup timeout to prevent memory leaks
+      return () => clearTimeout(timeoutId);
     }
-  };
+  }, [currentGraphLevel]);
 
-  const exitSubGraph = () => {
+  const exitSubGraph = useCallback(() => {
     if (navigationPath.length > 1) {
       setIsTransitioning(true);
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         // Pop the current level from the path
         const newPath = navigationPath.slice(0, -1);
         setNavigationPath(newPath);
@@ -326,30 +339,161 @@ const MyUniverse = () => {
         setCurrentNode(parentNodeId);
         setIsTransitioning(false);
       }, 300);
+      
+      // Cleanup timeout to prevent memory leaks
+      return () => clearTimeout(timeoutId);
     }
-  };
+  }, [navigationPath]);
 
-  const transitionToTechno = () => {
+  const transitionToTechno = useCallback(() => {
     // Set night mode based on current time when transitioning from start
     const currentHour = new Date().getHours();
     const shouldBeNight = currentHour >= 18 || currentHour < 6;
     setIsNightMode(shouldBeNight);
     navigate('techno');
-  };
+  }, [navigate]);
 
-  const toggleTime = () => {
-    setIsNightMode(!isNightMode);
-  };
+  const toggleTime = useCallback(() => {
+    setIsNightMode(prev => !prev);
+  }, []);
 
-  const renderSubGraphNode = () => {
+  // Memoized helper functions to prevent re-renders
+  const getProjectsHubTarget = useCallback(() => {
+    // If we're currently in the projects subgraph (navigationPath length > 1 and current graph level has projects-hub)
+    if (navigationPath.length > 1 && currentGraphLevel.nodes && currentGraphLevel.nodes['projects-hub']) {
+      return 'projects-hub';
+    }
+    // Otherwise, we're in the main graph level, so return 'projects'
+    return 'projects';
+  }, [navigationPath, currentGraphLevel]);
+
+  const getNodeBackgroundGradient = useCallback((theme) => {
+    switch (theme) {
+      case 'yellow-techno':
+        return 'linear-gradient(135deg, #92400e, #451a03)';
+      case 'tech':
+        return 'linear-gradient(135deg, #1e3a8a, #312e81)';
+      case 'mech-blue':
+        return 'linear-gradient(135deg, #1e40af, #1e3a8a)';
+      case 'electric-orange':
+        return 'linear-gradient(135deg, #ea580c, #c2410c)';
+      case 'code-green':
+        return 'linear-gradient(135deg, #059669, #047857)';
+      case 'nostalgic':
+        return 'linear-gradient(135deg, #581c87, #be185d)';
+      case 'green':
+        return 'linear-gradient(135deg, #0d3818, #001a0d)';
+      case 'blue':
+        return 'linear-gradient(135deg, #0c4a6e, #164e63)';
+      case 'purple':
+        return 'linear-gradient(135deg, #581c87, #6b21a8)';
+      case 'cyan':
+        return 'linear-gradient(135deg, #164e63, #0891b2)';
+      case 'orange':
+        return 'linear-gradient(135deg, #9a3412, #c2410c)';
+      default:
+        return 'linear-gradient(135deg, #374151, #1f2937)';
+    }
+  }, []);
+
+  // Memoized sub-graph node renderer
+  const renderSubGraphNode = useMemo(() => {
     const nodeData = currentGraphLevel.nodes[currentNode];
     if (!nodeData) return null;
+
+    // Get theme-specific colors
+    const getThemeColors = (theme) => {
+      switch (theme) {
+        case 'tech':
+          return {
+            titleColor: 'linear-gradient(45deg, #60a5fa, #22d3ee, #60a5fa)',
+            textColor: 'white',
+            buttonBg: 'rgba(96, 165, 250, 0.1)',
+            buttonBorder: 'rgba(96, 165, 250, 0.5)',
+            buttonColor: '#60a5fa',
+            buttonHoverBg: 'rgba(96, 165, 250, 0.2)',
+            buttonHoverBorder: 'rgba(96, 165, 250, 0.7)'
+          };
+        case 'mech-blue':
+          return {
+            titleColor: 'linear-gradient(45deg, #3b82f6, #60a5fa, #3b82f6)',
+            textColor: 'white',
+            buttonBg: 'rgba(59, 130, 246, 0.1)',
+            buttonBorder: 'rgba(59, 130, 246, 0.5)',
+            buttonColor: '#3b82f6',
+            buttonHoverBg: 'rgba(59, 130, 246, 0.2)',
+            buttonHoverBorder: 'rgba(59, 130, 246, 0.7)'
+          };
+        case 'electric-orange':
+          return {
+            titleColor: 'linear-gradient(45deg, #f97316, #fb923c, #f97316)',
+            textColor: 'white',
+            buttonBg: 'rgba(249, 115, 22, 0.1)',
+            buttonBorder: 'rgba(249, 115, 22, 0.5)',
+            buttonColor: '#f97316',
+            buttonHoverBg: 'rgba(249, 115, 22, 0.2)',
+            buttonHoverBorder: 'rgba(249, 115, 22, 0.7)'
+          };
+        case 'code-green':
+          return {
+            titleColor: 'linear-gradient(45deg, #10b981, #34d399, #10b981)',
+            textColor: 'white',
+            buttonBg: 'rgba(16, 185, 129, 0.1)',
+            buttonBorder: 'rgba(16, 185, 129, 0.5)',
+            buttonColor: '#10b981',
+            buttonHoverBg: 'rgba(16, 185, 129, 0.2)',
+            buttonHoverBorder: 'rgba(16, 185, 129, 0.7)'
+          };
+        case 'green':
+          return {
+            titleColor: 'linear-gradient(45deg, #00ff88, #66ffaa, #00ff88)',
+            textColor: 'white',
+            buttonBg: 'rgba(0, 255, 136, 0.1)',
+            buttonBorder: 'rgba(0, 255, 136, 0.5)',
+            buttonColor: '#00ff88',
+            buttonHoverBg: 'rgba(0, 255, 136, 0.2)',
+            buttonHoverBorder: 'rgba(0, 255, 136, 0.7)'
+          };
+        case 'nostalgic':
+          return {
+            titleColor: 'linear-gradient(45deg, #a78bfa, #f472b6, #a78bfa)',
+            textColor: 'white',
+            buttonBg: 'rgba(139, 92, 246, 0.1)',
+            buttonBorder: 'rgba(139, 92, 246, 0.5)',
+            buttonColor: '#8b5cf6',
+            buttonHoverBg: 'rgba(139, 92, 246, 0.2)',
+            buttonHoverBorder: 'rgba(139, 92, 246, 0.7)'
+          };
+        case 'orange':
+          return {
+            titleColor: 'linear-gradient(45deg, #ff8800, #ffaa44, #ff8800)',
+            textColor: 'white',
+            buttonBg: 'rgba(255, 136, 0, 0.1)',
+            buttonBorder: 'rgba(255, 136, 0, 0.5)',
+            buttonColor: '#ff8800',
+            buttonHoverBg: 'rgba(255, 136, 0, 0.2)',
+            buttonHoverBorder: 'rgba(255, 136, 0, 0.7)'
+          };
+        default:
+          return {
+            titleColor: 'white',
+            textColor: 'white',
+            buttonBg: 'rgba(255, 255, 255, 0.1)',
+            buttonBorder: 'rgba(255, 255, 255, 0.3)',
+            buttonColor: 'white',
+            buttonHoverBg: 'rgba(255, 255, 255, 0.2)',
+            buttonHoverBorder: 'rgba(255, 255, 255, 0.6)'
+          };
+      }
+    };
+
+    const colors = getThemeColors(nodeData.theme);
 
     return (
       <div style={{
         minHeight: '100vh',
         background: getNodeBackgroundGradient(nodeData.theme),
-        color: 'white',
+        color: colors.textColor,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -366,14 +510,22 @@ const MyUniverse = () => {
             fontSize: '4rem',
             fontWeight: 'bold',
             marginBottom: '2rem',
-            color: 'white'
+            background: colors.titleColor,
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: ['tech', 'mech-blue'].includes(nodeData.theme) ? '0 0 20px #60a5fa' : 
+                       nodeData.theme === 'electric-orange' ? '0 0 20px #f97316' :
+                       nodeData.theme === 'orange' ? '0 0 20px #ff8800' :
+                       nodeData.theme === 'code-green' ? '0 0 20px #10b981' : 'none'
           }}>
             {nodeData.title}
           </h1>
           <p style={{
             fontSize: '1.5rem',
             opacity: 0.9,
-            marginBottom: '3rem'
+            marginBottom: '3rem',
+            color: colors.textColor
           }}>
             {nodeData.content}
           </p>
@@ -391,22 +543,32 @@ const MyUniverse = () => {
                   onClick={() => navigate(connectedNodeId)}
                   style={{
                     padding: '12px 24px',
-                    background: `rgba(255, 255, 255, 0.1)`,
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    background: colors.buttonBg,
+                    border: `2px solid ${colors.buttonBorder}`,
                     borderRadius: '8px',
-                    color: 'white',
+                    color: colors.buttonColor,
                     cursor: 'pointer',
                     fontSize: '1rem',
                     fontWeight: 'bold',
                     transition: 'all 0.3s ease'
                   }}
                   onMouseEnter={e => {
-                    e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.6)';
+                    e.target.style.background = colors.buttonHoverBg;
+                    e.target.style.borderColor = colors.buttonHoverBorder;
+                    if (['tech', 'mech-blue'].includes(nodeData.theme)) {
+                      e.target.style.boxShadow = '0 5px 15px rgba(96, 165, 250, 0.4)';
+                    } else if (nodeData.theme === 'electric-orange') {
+                      e.target.style.boxShadow = '0 5px 15px rgba(249, 115, 22, 0.4)';
+                    } else if (nodeData.theme === 'orange') {
+                      e.target.style.boxShadow = '0 5px 15px rgba(255, 136, 0, 0.4)';
+                    } else if (nodeData.theme === 'code-green') {
+                      e.target.style.boxShadow = '0 5px 15px rgba(16, 185, 129, 0.4)';
+                    }
                   }}
                   onMouseLeave={e => {
-                    e.target.style.background = 'rgba(255, 255, 255, 0.1)';
-                    e.target.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    e.target.style.background = colors.buttonBg;
+                    e.target.style.borderColor = colors.buttonBorder;
+                    e.target.style.boxShadow = 'none';
                   }}
                 >
                   {connectedNode?.title || connectedNodeId}
@@ -417,42 +579,12 @@ const MyUniverse = () => {
         </div>
       </div>
     );
-  };
+  }, [currentGraphLevel, currentNode, navigate, getNodeBackgroundGradient]);
 
-  const getNodeBackgroundGradient = (theme) => {
-    switch (theme) {
-      case 'yellow-techno':
-        return 'linear-gradient(135deg, #92400e, #451a03)';
-      case 'tech':
-        return 'linear-gradient(135deg, #1e3a8a, #312e81)';
-      case 'nostalgic':
-        return 'linear-gradient(135deg, #581c87, #be185d)';
-      case 'green':
-        return 'linear-gradient(135deg, #0d3818, #001a0d)';
-      case 'blue':
-        return 'linear-gradient(135deg, #0c4a6e, #164e63)';
-      case 'purple':
-        return 'linear-gradient(135deg, #581c87, #6b21a8)';
-      case 'cyan':
-        return 'linear-gradient(135deg, #164e63, #0891b2)';
-      case 'orange':
-        return 'linear-gradient(135deg, #9a3412, #c2410c)';
-      default:
-        return 'linear-gradient(135deg, #374151, #1f2937)';
-    }
-  };
-        
-  // Helper function to determine the correct projects hub navigation target
-  const getProjectsHubTarget = () => {
-    // If we're currently in the projects subgraph (navigationPath length > 1 and current graph level has projects-hub)
-    if (navigationPath.length > 1 && currentGraphLevel.nodes && currentGraphLevel.nodes['projects-hub']) {
-      return 'projects-hub';
-    }
-    // Otherwise, we're in the main graph level, so return 'projects'
-    return 'projects';
-  };
-
-  const renderCurrentNode = () => {
+  // Memoized current node renderer with error boundary
+  const renderCurrentNode = useMemo(() => {
+    const projectsHubTarget = getProjectsHubTarget();
+    
     switch (currentNode) {
       case 'start':
         return <StartNode onTransition={transitionToTechno} />;
@@ -470,16 +602,16 @@ const MyUniverse = () => {
       case 'projects-hub':
         return <ProjectsNode onNavigate={navigate} />;
       case 'five-axis-printer':
-        return <FiveAxisPrinter onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+        return <FiveAxisPrinter onNavigate={navigate} projectsHubTarget={projectsHubTarget} />;
       case 'underwater-probe':
-        return <UnderwaterProbe onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+        return <UnderwaterProbe onNavigate={navigate} projectsHubTarget={projectsHubTarget} />;
       case 'piezo-microscope':
-        return <PiezoMicroscope onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+        return <PiezoMicroscope onNavigate={navigate} projectsHubTarget={projectsHubTarget} />;
       case 'personal-submarine':
-        return <PersonalSubmarine onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+        return <PersonalSubmarine onNavigate={navigate} projectsHubTarget={projectsHubTarget} />;
       case 'smaller-projects':
       case 'smaller-projects-hub':
-        return <SmallerProjects onNavigate={navigate} projectsHubTarget={getProjectsHubTarget()} />;
+        return <SmallerProjects onNavigate={navigate} projectsHubTarget={projectsHubTarget} />;
       case 'iot-weather-station':
         return <IoTWeatherStation onNavigate={navigate} />;
       case 'gesture-drone-interface':
@@ -494,11 +626,12 @@ const MyUniverse = () => {
         return <MagneticLevitation onNavigate={navigate} />;
       // Handle sub-graph nodes with generic node renderer
       default:
-        return renderSubGraphNode();
+        return renderSubGraphNode;
     }
-  };
+  }, [currentNode, isNightMode, navigate, toggleTime, transitionToTechno, getProjectsHubTarget, renderSubGraphNode]);
 
-  const transitionOverlayStyle = {
+  // Memoized style objects to prevent re-creation
+  const transitionOverlayStyle = useMemo(() => ({
     position: 'fixed',
     top: 0,
     left: 0,
@@ -509,64 +642,75 @@ const MyUniverse = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
-  };
+  }), []);
 
-  const transitionTextStyle = {
+  const transitionTextStyle = useMemo(() => ({
     color: '#facc15',
     fontSize: '24px'
-  };
+  }), []);
+
+  const containerStyle = useMemo(() => ({ 
+    position: 'relative' 
+  }), []);
 
   return (
-    <div style={{ position: 'relative' }}>
-      {/* Navigation Menu - only show on non-start nodes */}
-      {currentNode !== 'start' && (
-        <NavigationMenu 
-          memoryGraph={currentGraphLevel}
-          currentNode={currentNode}
-          onNavigate={navigate}
-          onEnterSubGraph={enterSubGraph}
-          onExitSubGraph={exitSubGraph}
-          navigationPath={navigationPath}
-          isNightMode={isNightMode}
-          onToggleTime={toggleTime}
-        />
-      )}
-      
-      <AnimatePresence mode="wait">
-        {!isTransitioning && (
-          <motion.div
-            key={currentNode}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {renderCurrentNode()}
-          </motion.div>
+    <ErrorBoundary>
+      <PerformanceMonitor enabled={process.env.NODE_ENV === 'development'} />
+      <div style={containerStyle}>
+        {/* Navigation Menu - only show on non-start nodes */}
+        {currentNode !== 'start' && (
+          <Suspense fallback={<div>Loading...</div>}>
+            <NavigationMenu 
+              memoryGraph={currentGraphLevel}
+              currentNode={currentNode}
+              onNavigate={navigate}
+              onEnterSubGraph={enterSubGraph}
+              onExitSubGraph={exitSubGraph}
+              navigationPath={navigationPath}
+              isNightMode={isNightMode}
+              onToggleTime={toggleTime}
+            />
+          </Suspense>
         )}
-      </AnimatePresence>
-      
-      <AnimatePresence>
-        {isTransitioning && (
-          <motion.div
-            style={transitionOverlayStyle}
-            initial={{ scale: 0, borderRadius: '50%' }}
-            animate={{ scale: 1, borderRadius: '0%' }}
-            exit={{ scale: 0, borderRadius: '50%' }}
-            transition={{ duration: 0.6, ease: 'easeInOut' }}
-          >
+        
+        <AnimatePresence mode="wait">
+          {!isTransitioning && (
             <motion.div
-              style={transitionTextStyle}
+              key={currentNode}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              Entering memory space...
+              <Suspense fallback={<div>Loading...</div>}>
+                {renderCurrentNode}
+              </Suspense>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </AnimatePresence>
+        
+        <AnimatePresence>
+          {isTransitioning && (
+            <motion.div
+              style={transitionOverlayStyle}
+              initial={{ scale: 0, borderRadius: '50%' }}
+              animate={{ scale: 1, borderRadius: '0%' }}
+              exit={{ scale: 0, borderRadius: '50%' }}
+              transition={{ duration: 0.6, ease: 'easeInOut' }}
+            >
+              <motion.div
+                style={transitionTextStyle}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                Entering memory space...
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </ErrorBoundary>
   );
 };
 

@@ -1,12 +1,17 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import UniverseButton from '../components/UniverseButton';
+import { getTheme, getSiteReference } from '../theme/universalTheme';
 
 const StartNode = ({ onTransition }) => {
+  // Get theme for start node
+  const siteRef = getSiteReference('start');
+  const theme = getTheme(siteRef.themeId);
+
   const containerStyle = {
     minHeight: '100vh',
-    backgroundColor: 'black',
-    color: 'white',
+    backgroundColor: theme.colors.bgOpacity40 || theme.colors.primary,
+    color: theme.colors.textPrimary || 'white',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -27,7 +32,7 @@ const StartNode = ({ onTransition }) => {
   };
 
   const subtitleStyle = {
-    color: '#9ca3af',
+    color: theme.colors.textSecondary || '#9ca3af',
     fontSize: '18px',
     maxWidth: '448px',
     margin: '0 auto'
