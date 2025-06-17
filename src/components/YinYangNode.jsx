@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { getTheme, getSiteReference } from '../theme/universalTheme';
 
 const YinYangNode = ({ 
   node, 
@@ -49,32 +50,45 @@ const YinYangNode = ({
 
   const getHoverHaloColor = () => {
     if (yinYangHoverSide === 'yin') {
-      // Night mode colors - purple/dark
-      return '#8b5cf6';
+      // Yin side - use night/dark theme (nostalgic purple)
+      const yinSiteRef = getSiteReference('memories');
+      const yinTheme = getTheme(yinSiteRef.themeId);
+      return yinTheme.colors.primary;
     } else if (yinYangHoverSide === 'yang') {
-      // Day mode colors - yellow/light
-      return '#facc15';
+      // Yang side - use day/light theme (yellow-techno)
+      const yangSiteRef = getSiteReference('techno');
+      const yangTheme = getTheme(yangSiteRef.themeId);
+      return yangTheme.colors.primary;
     }
     // Default color when no specific side is hovered
-    return '#facc15';
+    const defaultSiteRef = getSiteReference('techno');
+    const defaultTheme = getTheme(defaultSiteRef.themeId);
+    return defaultTheme.colors.primary;
   };
 
   const nodeRadius = isCurrent ? 20 : 15;
+  
+  // Get theme colors for both sides of the yin-yang
+  const yangSiteRef = getSiteReference('techno'); // Light/day side
+  const yangTheme = getTheme(yangSiteRef.themeId);
+  
+  const yinSiteRef = getSiteReference('memories'); // Dark/night side  
+  const yinTheme = getTheme(yinSiteRef.themeId);
 
   return (
     <g>
       {/* Define gradients for yin-yang */}
       <defs>
-        {/* Yang (light/day) gradient - yellow to orange */}
+        {/* Yang (light/day) gradient - use techno theme colors */}
         <linearGradient id={`yangGradient-${node.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#fbbf24" />
-          <stop offset="100%" stopColor="#f59e0b" />
+          <stop offset="0%" stopColor={yangTheme.colors.primary} />
+          <stop offset="100%" stopColor={yangTheme.colors.tertiary || yangTheme.colors.primary} />
         </linearGradient>
         
-        {/* Yin (dark/night) gradient - purple to pink */}
+        {/* Yin (dark/night) gradient - use memories theme colors */}
         <linearGradient id={`yinGradient-${node.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#8b5cf6" />
-          <stop offset="100%" stopColor="#ec4899" />
+          <stop offset="0%" stopColor={yinTheme.colors.primary} />
+          <stop offset="100%" stopColor={yinTheme.colors.secondary || yinTheme.colors.primary} />
         </linearGradient>
       </defs>
       
@@ -304,6 +318,47 @@ const YinYangNode = ({
             cy: { duration: 0.6, ease: "easeInOut" }
           }}
         />
+      )}
+      
+      {/* Site reference indicators on hover */}
+      {hoveredNode === node.id && yinYangHoverSide === 'yin' && (
+        <motion.text
+          x={position.x - nodeRadius - 5}
+          y={position.y - nodeRadius - 5}
+          style={{
+            fill: yinTheme.colors.primary,
+            fontSize: '8px',
+            textAnchor: 'middle',
+            dominantBaseline: 'middle',
+            pointerEvents: 'none',
+            fontWeight: 'bold'
+          }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+        >
+          {yinSiteRef.title}
+        </motion.text>
+      )}
+      
+      {hoveredNode === node.id && yinYangHoverSide === 'yang' && (
+        <motion.text
+          x={position.x + nodeRadius + 5}
+          y={position.y - nodeRadius - 5}
+          style={{
+            fill: yangTheme.colors.primary,
+            fontSize: '8px',
+            textAnchor: 'middle',
+            dominantBaseline: 'middle',
+            pointerEvents: 'none',
+            fontWeight: 'bold'
+          }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+        >
+          {yangSiteRef.title}
+        </motion.text>
       )}
     </g>
   );

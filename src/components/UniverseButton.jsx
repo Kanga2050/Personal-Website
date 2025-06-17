@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import ParticleSystem from './ParticleSystem';
+import { getTheme } from '../theme/universalTheme';
 
 const UniverseButton = ({ onTransition }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -43,19 +44,21 @@ const UniverseButton = ({ onTransition }) => {
     }, 800);
   };
 
+  const technoTheme = getTheme('yellow-techno');
+
   const buttonStyle = {
     position: 'relative',
     padding: '12px 24px',
-    backgroundColor: '#facc15',
-    color: 'black',
+    backgroundColor: technoTheme.colors.primary,
+    color: technoTheme.colors.textPrimary || 'black',
     fontWeight: 'bold',
     fontSize: '20px',
     borderRadius: '8px',
-    border: '2px solid #f59e0b',
+    border: `2px solid ${technoTheme.colors.tertiary || technoTheme.colors.primary}`,
     cursor: 'pointer',
     userSelect: 'none',
     transition: 'all 0.3s ease',
-    boxShadow: isHovered ? '0 0 20px rgba(251, 191, 36, 0.5)' : '0 0 10px rgba(251, 191, 36, 0.3)'
+    boxShadow: isHovered ? `0 0 20px ${technoTheme.colors.primary}80` : `0 0 10px ${technoTheme.colors.primary}50`
   };
 
   return (
@@ -76,6 +79,7 @@ const UniverseButton = ({ onTransition }) => {
         isActive={isHovered || isActive} 
         trigger={burstTrigger}
         origin={buttonPos}
+        particleColor={technoTheme.colors.primary}
       />
     </>
   );

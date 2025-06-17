@@ -58,10 +58,12 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
 
   const sectionStyle = {
     marginBottom: '3rem',
-    background: themeColors.background,
+    background: `${themeColors.background}`,
     padding: '2rem',
     borderRadius: '15px',
-    border: `1px solid ${themeColors.border}`
+    border: `1px solid ${themeColors.border}`,
+    backdropFilter: 'blur(10px)',
+    boxShadow: `0 4px 15px ${themeColors.shadow}`
   };
 
   const sectionTitleStyle = {
@@ -75,7 +77,8 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
     fontSize: '1.1rem',
     lineHeight: '1.7',
     marginBottom: '1rem',
-    opacity: 0.9
+    opacity: 0.9,
+    color: themeColors.secondary
   };
 
   const projectGridStyle = {
@@ -89,7 +92,9 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
     background: themeColors.background,
     padding: '1.5rem',
     borderRadius: '12px',
-    border: `1px solid ${themeColors.border}`
+    border: `1px solid ${themeColors.border}`,
+    backdropFilter: 'blur(10px)',
+    transition: 'all 0.3s ease'
   };
 
   const projectTitleStyle = {
@@ -243,7 +248,7 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
                   whileHover={{ 
                     scale: 1.02, 
                     borderColor: projectTheme.primary,
-                    boxShadow: `0 5px 15px ${projectTheme.shadow}`
+                    boxShadow: `0 8px 25px ${projectTheme.shadow}`
                   }}
                   onClick={() => onNavigate(project.id)}
                 >
@@ -253,7 +258,13 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
                   }}>
                     {project.title}
                   </div>
-                  <div style={projectDescStyle}>{project.description}</div>
+                  <div style={{
+                    ...projectDescStyle,
+                    color: projectTheme.secondary,
+                    opacity: 0.9
+                  }}>
+                    {project.description}
+                  </div>
                   <div style={{
                     marginTop: '1rem',
                     fontSize: '0.9rem',

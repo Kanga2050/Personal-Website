@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import YinYangNode from './YinYangNode';
+import { getTheme, getSiteReference } from '../theme/universalTheme';
 
 const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph, onExitSubGraph, navigationPath, isNightMode, onToggleTime }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,13 +13,17 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
   const [animatedPositions, setAnimatedPositions] = useState({});
   const [previousCurrentNode, setPreviousCurrentNode] = useState(currentNode);
 
-  // Memoized theme mapping to prevent recreation
-  const themeMapping = useMemo(() => ({
-    'techno': 'yellow-techno',
-    'projects': 'green',
-    'engineering': 'tech',
-    'memories': 'nostalgic'
-  }), []);
+  // Get theme for a node/site
+  const getNodeTheme = useCallback((nodeId) => {
+    const siteRef = getSiteReference(nodeId);
+    return getTheme(siteRef.themeId);
+  }, []);
+
+  // Get parent node theme for background effects
+  const getParentNodeTheme = useCallback((nodeId) => {
+    const siteRef = getSiteReference(nodeId);
+    return getTheme(siteRef.themeId);
+  }, []);
 
   // Memoized calculations
   const calculateRequiredRadiusForGraph = useCallback((graphNodes, graphEdges, centralNodeId) => {
@@ -46,9 +51,71 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     );
   }, [memoryGraph.nodes, memoryGraph.edges, currentNode, calculateRequiredRadiusForGraph]);
 
-  const getParentNodeTheme = useCallback((nodeId) => {
-    return themeMapping[nodeId] || 'green';
-  }, [themeMapping]);
+  // Memoized color functions using new theme system
+  const getNodeColor = useCallback((nodeIdOrTheme) => {
+    // Since we're passing node.theme, let's try direct theme lookup first
+    try {
+      const theme = getTheme(nodeIdOrTheme);
+      return theme.colors.primary;
+    } catch (e) {
+      // If that fails, try treating it as a node ID for site reference
+      try {
+        const siteRef = getSiteReference(nodeIdOrTheme);
+        if (siteRef) {
+          const theme = getTheme(siteRef.themeId);
+          return theme.colors.primary;
+        }
+      } catch (e2) {
+        // Final fallback: use default color
+        return '#6b7280';
+      }
+      return '#6b7280';
+    }
+  }, []);
+
+  const getHoverHaloColor = useCallback((nodeId) => {
+    if (nodeId === 'techno') {
+      if (yinYangHoverSide === 'yin') {
+        try {
+          const siteRef = getSiteReference('techno');
+          const theme = getTheme(siteRef.themeId);
+          return theme.colors.secondary || theme.colors.primary;
+        } catch (e) {
+          return '#8b5cf6'; // fallback purple
+        }
+      } else if (yinYangHoverSide === 'yang') {
+        try {
+          const siteRef = getSiteReference('techno');
+          const theme = getTheme(siteRef.themeId);
+          return theme.colors.primary;
+        } catch (e) {
+          return '#facc15'; // fallback yellow
+        }
+      }
+    }
+    
+    return getNodeColor(nodeId);
+  }, [yinYangHoverSide, getNodeColor]);
+
+  const getBackgroundColor = useCallback((nodeIdOrTheme) => {
+    try {
+      // First try to get the theme by treating it as a nodeId
+      const siteRef = getSiteReference(nodeIdOrTheme);
+      if (siteRef) {
+        const theme = getTheme(siteRef.themeId);
+        return theme.colors.bgOpacity40 || `${theme.colors.primary}40`;
+      }
+    } catch (e) {
+      // Fallback: treat it as a theme name directly
+    }
+    
+    try {
+      const theme = getTheme(nodeIdOrTheme);
+      return theme.colors.bgOpacity40 || `${theme.colors.primary}40`;
+    } catch (e) {
+      return 'rgba(107, 114, 128, 0.4)'; // fallback gray
+    }
+  }, [getNodeTheme]);
 
   useEffect(() => {
     // Get current node and its adjacent nodes
@@ -78,12 +145,10 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     // Maintain background circle for subgraph navigation
     // If we're in a subgraph (navigationPath length > 1), keep the background circle visible
     if (navigationPath.length > 1) {
-      // Get the parent node theme from the navigation path
+      // Get the parent node ID from the navigation path
       const parentNodeId = navigationPath[navigationPath.length - 1];
-      // We need to get the theme from the root level nodes since we're in a subgraph
-      const parentNodeTheme = getParentNodeTheme(parentNodeId);
-      if (parentNodeTheme && backgroundCircleRadius === 0) {
-        setBackgroundTheme(parentNodeTheme);
+      if (parentNodeId && backgroundCircleRadius === 0) {
+        setBackgroundTheme(parentNodeId); // Store the nodeId instead of theme name
         const requiredRadius = calculateRequiredRadius();
         setBackgroundCircleRadius(requiredRadius); // Set to calculated size immediately
       }
@@ -117,49 +182,6 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     return getNodePosition(nodeId, index, total);
   }, [animatedPositions, getNodePosition]);
 
-  // Memoized color functions
-  const getNodeColor = useCallback((theme) => {
-    switch (theme) {
-      case 'black': return '#374151';
-      case 'yellow-techno': return '#facc15';
-      case 'tech': return '#3b82f6';
-      case 'nostalgic': return '#8b5cf6';
-      case 'green': return '#66ff66';
-      case 'blue': return '#00aaff';
-      case 'purple': return '#aa66ff';
-      case 'cyan': return '#00ffcc';
-      case 'orange': return '#ff8800';
-      default: return '#6b7280';
-    }
-  }, []);
-
-  const getHoverHaloColor = useCallback((nodeId) => {
-    if (nodeId === 'techno') {
-      if (yinYangHoverSide === 'yin') {
-        return '#8b5cf6';
-      } else if (yinYangHoverSide === 'yang') {
-        return '#facc15';
-      }
-      return '#facc15';
-    }
-    
-    const node = memoryGraph.nodes[nodeId];
-    return node ? getNodeColor(node.theme) : '#6b7280';
-  }, [yinYangHoverSide, memoryGraph.nodes, getNodeColor]);
-
-  const getBackgroundColor = useCallback((theme) => {
-    const color = getNodeColor(theme);
-    const hex = color.replace('#', '');
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    
-    const brightness = 0.4;
-    const opacity = 0.6;
-    
-    return `rgba(${Math.min(255, r + r * brightness)}, ${Math.min(255, g + g * brightness)}, ${Math.min(255, b + b * brightness)}, ${opacity})`;
-  }, [getNodeColor]);
-
   // Memoized event handlers to prevent re-renders
   const handleNodeClick = useCallback((nodeId) => {
     const clickedNode = memoryGraph.nodes[nodeId];
@@ -178,7 +200,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
   }, [memoryGraph.nodes, currentNode, onEnterSubGraph, onNavigate]);
 
   const startExpansionAnimation = (node, onComplete) => {
-    setBackgroundTheme(node.theme);
+    setBackgroundTheme(node.id); // Store the nodeId instead of theme name
     setBackgroundCircleRadius(0);
     
     // Calculate the target radius based on the subgraph contents
@@ -229,8 +251,8 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     };
   };
 
-  const startCollapseAnimation = (theme, onComplete) => {
-    setBackgroundTheme(theme);
+  const startCollapseAnimation = (nodeId, onComplete) => {
+    setBackgroundTheme(nodeId); // Store the nodeId instead of theme name
     const startRadius = backgroundCircleRadius; // Use current radius as starting point
     
     // Use a more reliable animation approach with requestAnimationFrame
@@ -295,10 +317,9 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     if (distance > boundaryRadius && navigationPath.length > 1) {
       const currentNodeData = memoryGraph.nodes[currentNode];
       if (currentNodeData) {
-        // Get the theme for the collapse animation
+        // Get the parent node ID for the collapse animation
         const parentNodeId = navigationPath[navigationPath.length - 1];
-        const parentTheme = getParentNodeTheme(parentNodeId);
-        startCollapseAnimation(parentTheme, () => {
+        startCollapseAnimation(parentNodeId, () => {
           onExitSubGraph();
         });
       } else {
@@ -353,8 +374,8 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     height: '50px',
     borderRadius: '50%',
     backgroundColor: isOpen ? 'rgba(250, 204, 21, 0.2)' : 'rgba(0, 0, 0, 0.7)',
-    border: `2px solid ${isOpen ? '#facc15' : 'rgba(255, 255, 255, 0.3)'}`,
-    color: isOpen ? '#facc15' : 'white',
+    border: `2px solid ${isOpen ? getTheme('yellow-techno').colors.primary : 'rgba(255, 255, 255, 0.3)'}`,
+    color: isOpen ? getTheme('yellow-techno').colors.primary : 'white',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
@@ -362,7 +383,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
     fontSize: '20px',
     backdropFilter: 'blur(10px)',
     transition: 'all 0.3s ease',
-    boxShadow: isOpen ? '0 0 20px rgba(250, 204, 21, 0.3)' : 'none'
+    boxShadow: isOpen ? `0 0 20px ${getTheme('yellow-techno').colors.primary}30` : 'none'
   };
 
   const menuPanelStyle = {
@@ -530,7 +551,7 @@ const NavigationMenu = ({ memoryGraph, currentNode, onNavigate, onEnterSubGraph,
               {visibleNodes.map((node, index) => {
                 const position = getAnimatedNodePosition(node.id, index, visibleNodes.length);
                 const isCurrent = node.id === currentNode;
-                const nodeColor = getNodeColor(node.theme);
+                const nodeColor = getNodeColor(node.theme); // Use node's theme property
                 
                 // Special handling for techno node - render as yin-yang but treat as regular node
                 if (node.id === 'techno') {
