@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import ParticleSystem from '../../components/ParticleSystem';
 import AmbientParticles from '../../components/AmbientParticles';
+import { createDestinationStyledHandler } from '../../utils/themeUtils';
 
 const UnderwaterProbe = ({ onNavigate, projectsHubTarget }) => {
   const canvasRef = useRef(null);
@@ -226,16 +227,13 @@ const UnderwaterProbe = ({ onNavigate, projectsHubTarget }) => {
           transition={{ duration: 0.8, delay: 1.2 }}
         >
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('projects').style
+            }}
             onClick={() => onNavigate(projectsHubTarget || 'projects')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(77, 208, 225, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(77, 208, 225, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(77, 208, 225, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={createDestinationStyledHandler('projects').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('projects').onMouseLeave}
           >
             ← Back to Projects
           </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import AmbientParticles from '../../components/AmbientParticles';
 import SceneObject from '../../components/SceneObject';
+import { getDestinationThemeColors } from '../../utils/themeUtils';
 
 const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
   const containerStyle = {
@@ -180,7 +181,7 @@ const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={20} y={45}
           size="64px"
-          color="linear-gradient(135deg, #3b82f6, #06b6d4)"
+          color={`linear-gradient(135deg, ${getDestinationThemeColors('engineering').primary}, ${getDestinationThemeColors('engineering').secondary})`}
           onClick={() => onNavigate('engineering')}
         >
           <motion.div
@@ -195,7 +196,7 @@ const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={75} y={65}
           size="56px"
-          color="linear-gradient(135deg, #8b5cf6, #ec4899)"
+          color={`linear-gradient(135deg, ${getDestinationThemeColors('memories').primary}, #ec4899)`}
           onClick={() => onNavigate('memories')}
           hoverEffect="glow"
         >
@@ -211,7 +212,7 @@ const TechnoUniverseNight = ({ onNavigate, onToggleTime }) => {
         <SceneObject
           x={50} y={20}
           size="60px"
-          color="linear-gradient(135deg, #059669, #10b981)"
+          color={`linear-gradient(135deg, ${getDestinationThemeColors('projects').primary}, ${getDestinationThemeColors('projects').secondary})`}
           onClick={() => onNavigate('projects')}
           hoverEffect="pulse"
         >

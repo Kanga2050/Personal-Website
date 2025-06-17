@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import ParticleSystem from '../../../components/ParticleSystem';
 import AmbientParticles from '../../../components/AmbientParticles';
+import { createDestinationStyledHandler } from '../../../utils/themeUtils';
+import { createDestinationStyledHandler } from '../../../utils/themeUtils';
 
 const HolographicDisplay = ({ onNavigate }) => {
   const canvasRef = useRef(null);
@@ -232,16 +234,13 @@ const HolographicDisplay = ({ onNavigate }) => {
           transition={{ duration: 0.8, delay: 1.2 }}
         >
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('smaller-projects-hub').style
+            }}
             onClick={() => onNavigate('smaller-projects-hub')}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(103, 232, 249, 0.2)';
-              e.target.style.boxShadow = '0 5px 15px rgba(103, 232, 249, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(103, 232, 249, 0.1)';
-              e.target.style.boxShadow = 'none';
-            }}
+            onMouseEnter={createDestinationStyledHandler('smaller-projects-hub').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('smaller-projects-hub').onMouseLeave}
           >
             ← Back to Smaller Projects
           </div>

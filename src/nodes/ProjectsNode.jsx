@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import ParticleSystem from '../components/ParticleSystem';
 import SceneObject from '../components/SceneObject';
 import AmbientParticles from '../components/AmbientParticles';
+import { getDestinationThemeColors, createDestinationStyledHandler } from '../utils/themeUtils';
 
 const ProjectsNode = ({ onNavigate }) => {
   const canvasRef = useRef(null);
@@ -188,11 +189,6 @@ const ProjectsNode = ({ onNavigate }) => {
 
   const getThemeColors = (theme) => themes[theme] || themes.green;
 
-  const handleNavHover = (e, isEntering) => {
-    e.target.style.background = isEntering ? 'rgba(0, 255, 136, 0.2)' : 'rgba(0, 255, 136, 0.1)';
-    e.target.style.boxShadow = isEntering ? '0 5px 15px rgba(0, 255, 136, 0.4)' : 'none';
-  };
-
   const projects = [
     {
       id: 'five-axis-printer',
@@ -368,28 +364,37 @@ const ProjectsNode = ({ onNavigate }) => {
           transition={{ duration: 0.8, delay: 1.2 }}
         >
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('techno').style
+            }}
             onClick={() => onNavigate('techno')}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
+            onMouseEnter={createDestinationStyledHandler('techno').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('techno').onMouseLeave}
           >
             ↑ My Universe Hub
           </div>
           
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('engineering').style
+            }}
             onClick={() => onNavigate('engineering')}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
+            onMouseEnter={createDestinationStyledHandler('engineering').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('engineering').onMouseLeave}
           >
             ← Engineering Cosmos
           </div>
           
           <div
-            style={navBoxStyle}
+            style={{
+              ...navBoxStyle,
+              ...createDestinationStyledHandler('memories').style
+            }}
             onClick={() => onNavigate('memories')}
-            onMouseEnter={(e) => handleNavHover(e, true)}
-            onMouseLeave={(e) => handleNavHover(e, false)}
+            onMouseEnter={createDestinationStyledHandler('memories').onMouseEnter}
+            onMouseLeave={createDestinationStyledHandler('memories').onMouseLeave}
           >
             Memory Constellation →
           </div>
