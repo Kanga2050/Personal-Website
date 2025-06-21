@@ -10,8 +10,8 @@ const StartNode = ({ onTransition }) => {
 
   const containerStyle = {
     minHeight: '100vh',
-    backgroundColor: theme.colors.bgOpacity40 || theme.colors.primary,
-    color: theme.colors.textPrimary || 'white',
+    backgroundColor: '#000000', // Pure black background
+    color: 'white', // White text
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -28,11 +28,12 @@ const StartNode = ({ onTransition }) => {
     fontSize: '72px',
     fontWeight: '300',
     marginBottom: '32px',
-    letterSpacing: '0.1em'
+    letterSpacing: '0.1em',
+    color: 'white' // Ensure title text is white
   };
 
   const subtitleStyle = {
-    color: theme.colors.textSecondary || '#9ca3af',
+    color: '#9ca3af', // Light gray for subtitle
     fontSize: '18px',
     maxWidth: '448px',
     margin: '0 auto'

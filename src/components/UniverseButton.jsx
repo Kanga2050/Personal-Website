@@ -50,7 +50,7 @@ const UniverseButton = ({ onTransition }) => {
     position: 'relative',
     padding: '12px 24px',
     backgroundColor: technoTheme.colors.primary,
-    color: technoTheme.colors.textPrimary || 'black',
+    color: '#000000', // Black text for high contrast on yellow background
     fontWeight: 'bold',
     fontSize: '20px',
     borderRadius: '8px',
@@ -58,6 +58,7 @@ const UniverseButton = ({ onTransition }) => {
     cursor: 'pointer',
     userSelect: 'none',
     transition: 'all 0.3s ease',
+    textShadow: '1px 1px 2px rgba(255, 255, 255, 0.3)', // Light shadow for better visibility
     boxShadow: isHovered ? `0 0 20px ${technoTheme.colors.primary}80` : `0 0 10px ${technoTheme.colors.primary}50`
   };
 

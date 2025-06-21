@@ -319,47 +319,6 @@ const YinYangNode = ({
           }}
         />
       )}
-      
-      {/* Site reference indicators on hover */}
-      {hoveredNode === node.id && yinYangHoverSide === 'yin' && (
-        <motion.text
-          x={position.x - nodeRadius - 5}
-          y={position.y - nodeRadius - 5}
-          style={{
-            fill: yinTheme.colors.primary,
-            fontSize: '8px',
-            textAnchor: 'middle',
-            dominantBaseline: 'middle',
-            pointerEvents: 'none',
-            fontWeight: 'bold'
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-        >
-          {yinSiteRef.title}
-        </motion.text>
-      )}
-      
-      {hoveredNode === node.id && yinYangHoverSide === 'yang' && (
-        <motion.text
-          x={position.x + nodeRadius + 5}
-          y={position.y - nodeRadius - 5}
-          style={{
-            fill: yangTheme.colors.primary,
-            fontSize: '8px',
-            textAnchor: 'middle',
-            dominantBaseline: 'middle',
-            pointerEvents: 'none',
-            fontWeight: 'bold'
-          }}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-        >
-          {yangSiteRef.title}
-        </motion.text>
-      )}
     </g>
   );
 };

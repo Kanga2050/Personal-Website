@@ -28,8 +28,8 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
 
   const nodeStyle = {
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #9a3412, #c2410c)', // Orange gradient to match App.jsx
-    color: '#ffab91',
+    background: 'linear-gradient(135deg, #7c2d12 0%, #451a03 50%, #1c0a00 100%)', // Much darker orange gradient inspired by projects theme
+    color: '#fcd34d', // Brighter yellow-orange for better contrast
     fontFamily: 'Arial, sans-serif',
     position: 'relative',
     overflow: 'hidden',
@@ -58,12 +58,13 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
 
   const sectionStyle = {
     marginBottom: '3rem',
-    background: `${themeColors.background}`,
+    background: `${themeColors.background}dd`, // Add more opacity for better visibility
     padding: '2rem',
     borderRadius: '15px',
     border: `1px solid ${themeColors.border}`,
     backdropFilter: 'blur(10px)',
-    boxShadow: `0 4px 15px ${themeColors.shadow}`
+    boxShadow: `0 4px 15px ${themeColors.shadow}`,
+    backgroundColor: 'rgba(124, 45, 18, 0.3)' // Add a semi-transparent dark orange background
   };
 
   const sectionTitleStyle = {
@@ -89,12 +90,13 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
   };
 
   const projectCardStyle = {
-    background: themeColors.background,
+    background: `${themeColors.background}dd`, // Add more opacity for better visibility
     padding: '1.5rem',
     borderRadius: '12px',
     border: `1px solid ${themeColors.border}`,
     backdropFilter: 'blur(10px)',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    backgroundColor: 'rgba(124, 45, 18, 0.2)' // Add a semi-transparent dark orange background
   };
 
   const projectTitleStyle = {
@@ -238,9 +240,11 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
                   key={index}
                   style={{
                     ...projectCardStyle,
-                    background: projectTheme.background,
+                    background: `linear-gradient(135deg, ${projectTheme.primary}15, ${projectTheme.secondary}10)`,
+                    backgroundColor: `${projectTheme.primary}08`, // Very subtle theme-colored background
                     border: `1px solid ${projectTheme.border}`,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    boxShadow: `0 4px 15px ${projectTheme.primary}20`
                   }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -248,7 +252,8 @@ const SmallerProjects = ({ onNavigate, projectsHubTarget }) => {
                   whileHover={{ 
                     scale: 1.02, 
                     borderColor: projectTheme.primary,
-                    boxShadow: `0 8px 25px ${projectTheme.shadow}`
+                    boxShadow: `0 8px 25px ${projectTheme.primary}30`,
+                    background: `linear-gradient(135deg, ${projectTheme.primary}25, ${projectTheme.secondary}15)`
                   }}
                   onClick={() => onNavigate(project.id)}
                 >
