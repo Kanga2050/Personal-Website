@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import ParticleSystem from '../../../components/ParticleSystem';
 import AmbientParticles from '../../../components/AmbientParticles';
 import { createDestinationStyledHandler } from '../../../utils/themeUtils';
-import { createDestinationStyledHandler } from '../../../utils/themeUtils';
 
 const HolographicDisplay = ({ onNavigate }) => {
   const canvasRef = useRef(null);

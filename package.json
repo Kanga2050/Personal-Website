@@ -2,6 +2,7 @@
   "name": "codespaces-react",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Kanga2050.github.io/Personal-Website",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -20,7 +21,9 @@
     "start": "BROWSER=none WDS_SOCKET_PORT=0 vite --port 3000",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "eslintConfig": {
     "extends": [
@@ -42,8 +45,9 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.1.1",
+    "gh-pages": "^6.3.0",
     "jsdom": "^22.1.0",
-    "vite": "^4.5.9",
-    "vitest": "^0.34.6"
+    "vite": "^7.0.6",
+    "vitest": "^3.2.4"
   }
 }
