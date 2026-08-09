@@ -4,20 +4,22 @@ import App from './App';
 import { nodes, pathTo } from './data/site';
 
 describe('App', () => {
-  test('opens on the entry page', () => {
+  test('opens on the landscape with every destination reachable', () => {
     render(<App />);
-    expect(screen.getByRole('heading', { name: 'Universe' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: /enter/i })).toBeTruthy();
+
+    expect(screen.getByRole('heading', { name: /Shaurya/ })).toBeTruthy();
+    for (const label of ['Workshop', 'Code', 'Field Notes', 'About']) {
+      expect(screen.getByRole('button', { name: new RegExp(label) })).toBeTruthy();
+    }
   });
 
-  test('entering reveals the hub destinations', async () => {
+  test('a landmark leads into its section', async () => {
     render(<App />);
-    fireEvent.click(screen.getByRole('button', { name: /enter/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Workshop/ }));
 
-    // The entry page has to finish exiting before the hub mounts.
-    for (const title of ['Engineering', 'Projects', 'Memories']) {
-      expect(await screen.findByText(title)).toBeTruthy();
-    }
+    // The landing view has to finish fading out before the section mounts.
+    expect(await screen.findByText('5-Axis 3D Printer')).toBeTruthy();
+    expect(await screen.findByText('Contacting the ISS')).toBeTruthy();
   });
 });
 
@@ -28,19 +30,37 @@ describe('site graph', () => {
     }
   });
 
-  test('collections only list nodes that exist', () => {
+  test('sections only list nodes that exist', () => {
     for (const [id, node] of Object.entries(nodes)) {
-      if (node.kind !== 'collection') continue;
+      if (node.kind !== 'section') continue;
       for (const item of node.items) {
         expect(nodes[item], `'${id}' links to missing '${item}'`).toBeTruthy();
       }
     }
   });
 
-  test('detail pages point back at a real parent', () => {
+  test('projects point back at a real parent', () => {
     for (const [id, node] of Object.entries(nodes)) {
-      if (node.kind !== 'detail') continue;
+      if (node.kind !== 'project') continue;
       expect(nodes[node.parent], `'${id}' has no parent`).toBeTruthy();
+    }
+  });
+
+  test('every media placeholder declares a kind and a note', () => {
+    const slots = [];
+    for (const node of Object.values(nodes)) {
+      if (node.media) slots.push(node.media);
+      if (node.hero) slots.push(node.hero);
+      if (node.portrait) slots.push(node.portrait);
+      for (const section of node.sections ?? []) {
+        if (section.media) slots.push(section.media);
+      }
+    }
+
+    expect(slots.length).toBeGreaterThan(10);
+    for (const slot of slots) {
+      expect(['photo', 'video', 'animation']).toContain(slot.kind);
+      expect(slot.note?.length ?? 0).toBeGreaterThan(8);
     }
   });
 });

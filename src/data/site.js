@@ -1,783 +1,851 @@
 /**
- * Every page's content lives here.
+ * All site content lives here.
  *
- * `nodes` is a single map keyed by node id. A node is either a `collection`
- * (a hub that lists other nodes) or a `detail` (a write-up). Both render
- * through generic components, so adding a page means adding an entry here —
- * not another 250-line copy of the same JSX.
+ * A node is one of three kinds:
+ *   section — a hub that lists the projects beneath it
+ *   project — a write-up
+ *   about   — the single profile page
  *
- * Section shapes: { heading, body: [] } | { heading, list: [] } |
- * { heading, specs: [[label, value]] }
+ * `media` entries are intentional blanks: each one renders a labelled frame
+ * where a photo, render, video or animation should be dropped in.
  */
 
 export const nodes = {
   // ── Root ────────────────────────────────────────────────────────────────
-  universe: {
-    title: 'Universe',
-    short: 'Universe',
-    theme: 'universe',
-    icon: 'map',
-    tagline: 'The hub every other section hangs off.',
+  home: {
+    kind: 'home',
+    title: 'Shaurya Chauhan',
+    short: 'Home',
+    section: 'home',
+    icon: 'home',
+    tagline: 'Machines, models and field notes.',
   },
 
-  memories: {
-    title: 'Memories',
-    short: 'Memories',
-    theme: 'memories',
-    icon: 'memories',
-    tagline: 'Fragments of time, arranged as a constellation.',
-  },
-
-  // ── Engineering ─────────────────────────────────────────────────────────
-  engineering: {
-    kind: 'collection',
-    title: 'Engineering',
-    short: 'Engineering',
-    theme: 'engineering',
-    icon: 'engineering',
-    tagline: 'Three disciplines that keep overlapping.',
+  // ── Workshop ────────────────────────────────────────────────────────────
+  workshop: {
+    kind: 'section',
+    title: 'Workshop',
+    short: 'Workshop',
+    section: 'workshop',
+    icon: 'workshop',
+    tagline: 'Things with moving parts.',
+    unit: 'builds',
     intro:
-      'Most things worth building sit at the seam between mechanical, electrical and software work. These are the three I keep returning to, and the tools and habits that go with each.',
-    items: ['mech-design', 'electronics', 'software'],
-    links: [
-      { to: 'universe', label: 'Universe', direction: 'back' },
-      { to: 'projects', label: 'Projects', direction: 'forward' },
-    ],
-  },
-
-  'mech-design': {
-    kind: 'detail',
-    title: 'Mechanical Design',
-    short: 'Mechanical',
-    theme: 'mechanical',
-    icon: 'mechanical',
-    tagline: 'CAD, tolerances and the parts that have to physically fit.',
-    parent: 'engineering',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'Parametric modelling, assembly design and the analysis that decides whether a part survives its first prototype. Most of my work starts here — as a sketch that has to become a real object with real clearances.',
-          'The interesting constraint is almost never the geometry. It is the manufacturing process, the material on hand, and the tolerance stack that only shows up once three parts meet.',
-        ],
-      },
-      {
-        heading: 'What that involves',
-        list: [
-          'Parametric CAD with design intent that survives revision',
-          'Tolerance stack-up analysis across multi-part assemblies',
-          'FEA for load paths, stiffness and failure modes',
-          'Design for additive, CNC and sheet-metal processes',
-          'Fixture and jig design for repeatable assembly',
-          'Iterating on printed prototypes before committing to metal',
-        ],
-      },
-      {
-        heading: 'Toolchain',
-        specs: [
-          ['CAD', 'Fusion 360, SolidWorks, OnShape'],
-          ['Analysis', 'Static FEA, thermal, basic modal'],
-          ['Fabrication', 'FDM and SLA printing, laser cutting, manual machining'],
-          ['Metrology', 'Calipers, dial indicators, printed go/no-go gauges'],
-        ],
-      },
-    ],
-  },
-
-  electronics: {
-    kind: 'detail',
-    title: 'Electronics',
-    short: 'Electronics',
-    theme: 'electronics',
-    icon: 'electronics',
-    tagline: 'Circuits, boards and the firmware sitting on top of them.',
-    parent: 'engineering',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'Schematic capture through to a board that boots. Sensor front-ends, motor drive, power supplies, and the embedded firmware that has to be reliable when nobody is watching it.',
-          'Analogue is where the difficulty hides. A digital bug is reproducible; a grounding problem is a weekend.',
-        ],
-      },
-      {
-        heading: 'What that involves',
-        list: [
-          'Schematic capture and multi-layer PCB layout',
-          'Low-noise analogue front-ends for sensor measurement',
-          'Switching and linear power supply design',
-          'Motor drive: stepper, BLDC and closed-loop control',
-          'Bare-metal and RTOS firmware on ARM and AVR targets',
-          'Bring-up and debugging with scope, logic analyser and a lot of patience',
-        ],
-      },
-      {
-        heading: 'Toolchain',
-        specs: [
-          ['EDA', 'KiCad, Altium'],
-          ['Targets', 'STM32, ESP32, AVR, RP2040'],
-          ['Bus work', 'I²C, SPI, UART, CAN, USB'],
-          ['Bench', 'Mixed-signal scope, logic analyser, bench PSU, hot air'],
-        ],
-      },
-    ],
-  },
-
-  software: {
-    kind: 'detail',
-    title: 'Software',
-    short: 'Software',
-    theme: 'software',
-    icon: 'software',
-    tagline: 'The layer that makes the hardware behave.',
-    parent: 'engineering',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'Control loops, motion planning, data pipelines and the interfaces people actually touch. Software is where a mechanism stops being a mechanism and starts being a tool.',
-          'The projects here all need the same things: deterministic timing at the bottom, something legible at the top, and a clean seam between them.',
-        ],
-      },
-      {
-        heading: 'What that involves',
-        list: [
-          'Real-time control loops and motion planning',
-          'Kinematics and coordinate transforms for multi-axis machines',
-          'Computer vision pipelines for tracking and inspection',
-          'Signal processing on noisy sensor data',
-          'Web interfaces and dashboards for instruments',
-          'Test harnesses that catch regressions before the hardware does',
-        ],
-      },
-      {
-        heading: 'Toolchain',
-        specs: [
-          ['Languages', 'C, C++, Python, JavaScript'],
-          ['Numerics', 'NumPy, SciPy, OpenCV'],
-          ['Interfaces', 'React, WebSockets, MQTT'],
-          ['Infrastructure', 'Linux, Git, CI pipelines, containers'],
-        ],
-      },
-    ],
-  },
-
-  // ── Projects ────────────────────────────────────────────────────────────
-  projects: {
-    kind: 'collection',
-    title: 'Projects',
-    short: 'Projects',
-    theme: 'projects',
-    icon: 'projects',
-    tagline: 'Things built, half-built, and still on the bench.',
-    intro:
-      'A handful of larger builds, plus a lab of smaller experiments. Each one exists because something was easier to learn by making it than by reading about it.',
+      'Machines built end to end — mechanism, electronics and the firmware that ties them together. Each of these started as a problem that was easier to understand by building it than by reading about it.',
     items: [
       'five-axis-printer',
-      'underwater-probe',
-      'piezo-microscope',
-      'personal-submarine',
-      'smaller-projects',
+      'hydrogen-car',
+      'vtol-drone',
+      'tshirt-cannon',
+      'iss-radio',
     ],
-    links: [
-      { to: 'universe', label: 'Universe', direction: 'back' },
-      { to: 'engineering', label: 'Engineering', direction: 'forward' },
-    ],
+    media: {
+      kind: 'photo',
+      note: 'Wide shot of the bench — printer, drone airframe and tooling',
+    },
   },
 
   'five-axis-printer': {
-    kind: 'detail',
+    kind: 'project',
     title: '5-Axis 3D Printer',
     short: '5-Axis',
-    theme: 'projects',
+    section: 'workshop',
     icon: 'printer',
+    meta: 'Personal build',
+    status: 'Printing',
+    parent: 'workshop',
     tagline:
-      'Additive manufacturing with a bed that rotates and tilts mid-print, so overhangs stop needing support.',
-    status: 'In development',
-    parent: 'projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A printer that rotates and tilts the build plate while printing, letting the nozzle reach geometry that a three-axis machine can only produce with sacrificial support material.',
-          'It is essentially FDM printing married to CNC-style five-axis motion: the same extruder, a far more interesting coordinate system.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Simultaneous five-axis motion with real-time inverse kinematics',
-          'Custom G-code interpreter for non-planar toolpaths',
-          'Collision detection between nozzle, part and bed',
-          'Automatic calibration and bed levelling',
-          'Support-free printing for steep overhangs',
-          'Heated chamber for warp-prone materials',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Motion', 'Custom controller with closed-loop stepper drivers'],
-          ['Build volume', '200 × 200 × 150 mm, fully reachable'],
-          ['Layer height', '0.05 – 0.3 mm, variable'],
-          ['Materials', 'PLA, PETG, ABS, TPU, carbon-fibre composites'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'The prototype prints. Test parts with 70° overhangs come off the bed clean and support-free, which was the whole point.',
-          'Current work is on the slicer: planar slicing throws away most of the machine, so the toolpath generator is being rewritten around curved layers.',
-        ],
-      },
-    ],
-  },
-
-  'underwater-probe': {
-    kind: 'detail',
-    title: 'Underwater Probe',
-    short: 'Probe',
-    theme: 'deep',
-    icon: 'probe',
-    tagline:
-      'An autonomous vehicle for water-quality survey work, rated to 500 metres.',
-    status: 'Field testing',
-    parent: 'projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A self-navigating probe that runs survey transects and logs water chemistry, imagery and position without a tether. Built for environmental monitoring where sending a boat out every week is not practical.',
-          'Everything about the design is downstream of one constraint: at depth, a single seal failure ends the mission and the hardware.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Pressure-resistant hull with redundant seal design',
-          'Full-coverage camera system with LED arrays',
-          'Water-quality sensing: pH, temperature, salinity, turbidity',
-          'Surface GPS fix and telemetry uplink between dives',
-          'Emergency ballast release as a hardware-level failsafe',
-          'Autonomous waypoint navigation with obstacle avoidance',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Compute', 'Raspberry Pi 4 with custom sensor interface boards'],
-          ['Depth rating', '500 m operational, tested to 600 m'],
-          ['Endurance', 'Up to 12 hours continuous'],
-          ['Propulsion', 'Vectored thrust, redundant motors'],
-          ['Comms', 'Acoustic modem at depth, RF telemetry at surface'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Shallow-water trials are complete. Autonomous navigation, logging and emergency recovery all behaved as designed across repeated dives.',
-          'Next is a deep trial, and a classifier that flags marine life in the captured imagery so the survey data does not need reviewing frame by frame.',
-        ],
-      },
-    ],
-  },
-
-  'piezo-microscope': {
-    kind: 'detail',
-    title: 'Piezoelectric Microscope',
-    short: 'Microscope',
-    theme: 'optics',
-    icon: 'microscope',
-    tagline:
-      'Sub-nanometre sample positioning using piezo actuators with capacitive feedback.',
-    status: 'Prototype',
-    parent: 'projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A positioning stage that holds a sample steady to a fraction of a nanometre, built to make long imaging sessions possible without drift eating the result.',
-          'The imaging is the easy half. The hard half is a stage that does not move when the building does.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Sub-nanometre positioning, ±0.1 nm demonstrated',
-          'Active vibration compensation from accelerometer feedback',
-          'Automated sample navigation with drift correction',
-          'Environmental chamber for controlled temperature and humidity',
-          'Assisted image analysis for repeated feature detection',
-          'Scripted acquisition for unattended overnight runs',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Stage', 'Three-axis piezo actuators, capacitive position feedback'],
-          ['Resolution', '0.1 nm positioning accuracy'],
-          ['Electronics', 'Custom low-noise amplifiers and DAQ'],
-          ['Control', 'LabVIEW acquisition, MATLAB image processing'],
-          ['Environment', '±0.01 °C stability, passive vibration isolation'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'The stage holds 0.1 nm through multi-hour sessions with drift inside the noise floor, which is the specification it was built to hit.',
-          'Work continues on automated feature detection and on sample holders that suit biological work rather than rigid materials.',
-        ],
-      },
-    ],
-  },
-
-  'personal-submarine': {
-    kind: 'detail',
-    title: 'Personal Submarine',
-    short: 'Submarine',
-    theme: 'marine',
-    icon: 'submarine',
-    tagline:
-      'A single-seat submersible with an acrylic viewing dome, rated to 30 metres.',
-    status: 'Concept',
-    parent: 'projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A compact one-person submersible for shallow-water observation and photography, built around a transparent dome that puts the pilot inside the view rather than behind a porthole.',
-          'A vehicle carrying a person is a different discipline to one carrying sensors. Every subsystem gets a second, independent way to fail safely.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Panoramic acrylic dome for unobstructed visibility',
-          'Electric thrusters with variable-speed control',
-          'Automatic ballast release for emergency ascent',
-          'Integrated camera systems for documentation',
-          'Life support with CO₂ scrubbing and air recycling',
-          'LED arrays for illumination below the light line',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Hull', 'Marine-grade aluminium with acrylic viewing sphere'],
-          ['Depth rating', '30 m operational, tested to 45 m'],
-          ['Dive duration', 'Up to 6 hours on life support'],
-          ['Propulsion', 'Battery-electric thrusters, 8 hours runtime'],
-          ['Safety', 'Emergency ascent, surface beacon, acoustic comms'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Pressure testing and emergency-systems validation are complete, including escape procedures run in controlled conditions.',
-          'The remaining work is certification, plus navigation and communication upgrades that a certified vessel would need anyway.',
-        ],
-      },
-    ],
-  },
-
-  // ── The lab ─────────────────────────────────────────────────────────────
-  'smaller-projects': {
-    kind: 'collection',
-    title: 'Innovation Lab',
-    short: 'Lab',
-    theme: 'lab',
-    icon: 'lab',
-    tagline: 'Smaller experiments, built to answer one question each.',
-    status: 'Ongoing',
-    parent: 'projects',
-    intro:
-      'Short-cycle builds and proof-of-concept work. Each one exists to test a single idea quickly, and most of them feed something back into the larger projects.',
-    items: [
-      'iot-weather-station',
-      'gesture-drone-interface',
-      'autonomous-garden',
-      'holographic-display',
-      'neural-network-music',
-      'magnetic-levitation',
-    ],
-    links: [{ to: 'projects', label: 'Projects', direction: 'back' }],
-  },
-
-  'iot-weather-station': {
-    kind: 'detail',
-    title: 'IoT Weather Station',
-    short: 'Weather',
-    theme: 'deep',
-    icon: 'weather',
-    tagline:
-      'A solar-powered sensor package logging local conditions to a web dashboard.',
-    status: 'Deployed',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'An autonomous weather station that measures the usual atmospheric parameters and pushes them to a dashboard, running entirely off solar with no site visits.',
-          'The engineering problem is not the sensing. It is surviving a year outdoors on a power budget that a cloudy week has to fit inside.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Temperature, humidity and barometric pressure logging',
-          'Wind speed and direction from an anemometer array',
-          'Rainfall detection and accumulation tracking',
-          'Solar radiation and UV index measurement',
-          'LoRaWAN uplink with cellular fallback',
-          'Web dashboard with historical charts',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Compute', 'ESP32 with a low-power sensor interface board'],
-          ['Power', '20 W panel, 12 V lithium pack, MPPT charging'],
-          ['Sampling', 'Five-minute interval, one year of local storage'],
-          ['Comms', 'LoRaWAN primary, 4G LTE backup'],
-          ['Enclosure', 'IP65, radiation-shielded sensor head'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Running continuously for six months at 99.8% uptime, tracking a reference station closely enough that the readings are usable.',
-          'Next is a second and third node, which turns a single station into a small distributed network worth doing forecasting on.',
-        ],
-      },
-    ],
-  },
-
-  'gesture-drone-interface': {
-    kind: 'detail',
-    title: 'Gesture Drone Interface',
-    short: 'Gestures',
-    theme: 'optics',
-    icon: 'drone',
-    tagline: 'Flying a drone with hand tracking instead of a controller.',
-    status: 'Beta',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A vision system that reads hand pose from a depth camera and maps it to flight commands, so a pilot can frame a shot by pointing at it.',
-          'Gesture control is easy to demo and hard to trust. Most of the work went into making the failure modes boring: an unrecognised gesture must always mean hold position, never something creative.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Real-time hand tracking from a depth camera',
-          'Learned gesture classification at 98% accuracy',
-          'Point to steer, palm angle for altitude',
-          'Dedicated emergency-stop gesture for immediate landing',
-          'Customisable gesture bindings for advanced manoeuvres',
-          'On-screen overlay showing the recognised state',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Vision', 'Intel RealSense D435i depth and RGB'],
-          ['Compute', 'NVIDIA Jetson Nano, on-device inference'],
-          ['Latency', 'Under 50 ms, gesture to command'],
-          ['Range', 'Reliable detection to 3 m'],
-          ['Integration', 'DJI SDK'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Beta testing with experienced pilots showed a clear preference over a controller for slow, framed camera moves — and a clear preference against it for anything fast.',
-          'That result set the direction: it is a cinematography interface, not a replacement for sticks.',
-        ],
-      },
-    ],
-  },
-
-  'autonomous-garden': {
-    kind: 'detail',
-    title: 'Autonomous Garden',
-    short: 'Garden',
-    theme: 'software',
-    icon: 'garden',
-    tagline: 'Irrigation that decides for itself when and how much to water.',
-    status: 'Field testing',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A zoned irrigation system driven by soil sensing and a weather forecast rather than a timer, with a camera watching for the visual signs of stress a moisture probe misses.',
-          'A timer waters on Tuesday whether it rained on Monday or not. Almost all of the water saving comes from simply not doing that.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Multi-zone soil moisture and pH monitoring',
-          'Automated drip irrigation with per-zone valve control',
-          'Plant health assessment from multispectral imaging',
-          'Forecast integration to skip watering before rain',
-          'Mobile dashboard with alerts',
-          'Solar power with rainwater collection',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Compute', 'Raspberry Pi 4 with a custom sensor board'],
-          ['Irrigation', 'Eight zones, solenoid valve control'],
-          ['Sensing', 'Soil moisture, pH, temperature, light, humidity'],
-          ['Vision', 'Pi HQ camera with multispectral filters'],
-          ['Power', '100 W solar with battery backup'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'A season of field testing showed roughly 40% less water used than the timer it replaced, with better plant health across fifteen species.',
-          'Pest detection is the next addition — the camera is already there, it just is not being asked the right question yet.',
-        ],
-      },
-    ],
-  },
-
-  'holographic-display': {
-    kind: 'detail',
-    title: 'Holographic Display',
-    short: 'Hologram',
-    theme: 'marine',
-    icon: 'hologram',
-    tagline:
-      'A volumetric display built from a swept LED matrix and persistence of vision.',
-    status: 'Research',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A display that produces a genuine three-dimensional image in a volume of air, viewable from any angle without glasses, by sweeping a high-speed LED matrix through space.',
-          'Volumetric rendering is a different problem to conventional graphics: there is no camera, no occlusion, and no back face to cull.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Full 360° viewing with real depth parallax',
-          'Over 10,000 addressable points in the swept volume',
-          'Persistence-of-vision reconstruction at video rates',
-          'Real-time data visualisation input',
-          'Gesture control for rotating and slicing the volume',
-          'Rendering engine written for voxels rather than pixels',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Volume', '64 × 64 × 64 voxels, RGB'],
-          ['Refresh', '60 Hz volumetric, flicker-free'],
-          ['Rendering', 'FPGA pipeline for the real-time voxel path'],
-          ['Drive', 'Custom PCB with high-speed constant-current drivers'],
-          ['Power', '500 W with active thermal management'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'The prototype renders geometry and live data plots cleanly, bright enough to read in a normally lit room.',
-          'Doubling to 128³ is the next step, which is mostly a memory-bandwidth problem rather than an optical one.',
-        ],
-      },
-    ],
-  },
-
-  'neural-network-music': {
-    kind: 'detail',
-    title: 'Neural Music Generator',
-    short: 'Music',
-    theme: 'optics',
-    icon: 'music',
-    tagline: 'A sequence model that composes MIDI across several genres.',
-    status: 'Experiment',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'A transformer trained on MIDI that generates original compositions, with enough parameter control to steer it toward a genre, tempo and mood rather than just sampling from it blindly.',
-          'Symbolic music turns out to be an unusually good sequence-modelling problem: the structure is long-range, but the vocabulary is small and the output is directly playable.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Trained across classical, jazz, electronic and rock',
-          'Real-time generation with adjustable parameters',
-          'Style transfer between genres on a fixed melody',
-          'Browser interface for interactive composition',
-          'MIDI export into standard DAWs and hardware',
-          'Continuation mode that extends a human-written phrase',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Architecture', 'Transformer with relative positional attention'],
-          ['Training data', '50,000+ MIDI files across genres and eras'],
-          ['Hardware', 'Single RTX 4090 for training and inference'],
-          ['Output', 'MIDI, rendered WAV, live DAW routing'],
-          ['Interface', 'Web GUI with real-time parameter control'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Output is harmonically coherent and stylistically consistent over a couple of minutes, which is roughly where the attention window stops helping.',
-          'The interesting direction is not autonomy but collaboration: continuation and re-harmonisation of a human part beats generation from nothing.',
-        ],
-      },
-    ],
-  },
-
-  'magnetic-levitation': {
-    kind: 'detail',
-    title: 'Magnetic Levitation',
-    short: 'Levitation',
-    theme: 'lab',
-    icon: 'magnet',
-    tagline: 'Objects held in mid-air by a 1 kHz feedback loop.',
-    status: 'Working',
-    parent: 'smaller-projects',
-    sections: [
-      {
-        heading: 'Overview',
-        body: [
-          'An electromagnetic suspension rig that holds small objects stationary in mid-air, correcting position a thousand times a second against a fundamentally unstable equilibrium.',
-          'Magnetic levitation is the textbook unstable plant: no passive arrangement of magnets holds still. Everything you see is the controller working.',
-        ],
-      },
-      {
-        heading: 'Key features',
-        list: [
-          'Hall-sensor position feedback with 0.1 mm resolution',
-          'PID control tuned for disturbance rejection',
-          'Independent control of multiple levitated objects',
-          'Gesture and touch interaction to move the setpoint',
-          'LED lighting synchronised to object position',
-          'Sound-reactive mode driven by audio envelope',
-        ],
-      },
-      {
-        heading: 'Specifications',
-        specs: [
-          ['Control', 'Arduino Mega with custom electromagnet drivers'],
-          ['Sensing', 'Hall effect array, 0.1 mm resolution'],
-          ['Actuation', 'Custom-wound coils with variable field strength'],
-          ['Loop rate', '1 kHz'],
-          ['Payload', '1 – 50 g within a 200 mm³ working volume'],
-          ['Supply', '24 V switched-mode with current limiting'],
-        ],
-      },
-      {
-        heading: 'Where it stands',
-        body: [
-          'Stable indefinitely, and it recovers from a deliberate nudge without losing the object — which is the honest test of the loop.',
-          'Multi-object choreography is next, along with wireless power delivery so the levitated object can do something once it is up there.',
-        ],
-      },
-    ],
-  },
-};
-
-/**
- * Navigation graph. Levels are flat maps of ids; `children` opens a nested
- * level whose hub is the parent itself.
- */
-export const graph = {
-  ids: ['universe', 'engineering', 'memories', 'projects'],
-  edges: {
-    universe: ['engineering', 'memories', 'projects'],
-    engineering: ['universe', 'projects'],
-    memories: ['universe', 'projects'],
-    projects: ['universe', 'engineering', 'memories'],
-  },
-  children: {
-    engineering: {
-      ids: ['engineering', 'mech-design', 'electronics', 'software'],
-      edges: {
-        engineering: ['mech-design', 'electronics', 'software'],
-        'mech-design': ['engineering'],
-        electronics: ['engineering'],
-        software: ['engineering'],
-      },
+      'CoreXYAB flying gantry over a custom trunnion, with firmware and a slicer written for it.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — printer three-quarter view, gantry and trunnion visible',
     },
-    projects: {
-      ids: [
-        'projects',
-        'five-axis-printer',
-        'underwater-probe',
-        'piezo-microscope',
-        'personal-submarine',
-        'smaller-projects',
-      ],
-      edges: {
-        projects: [
-          'five-axis-printer',
-          'underwater-probe',
-          'piezo-microscope',
-          'personal-submarine',
-          'smaller-projects',
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A printer that tilts and rotates the part underneath a moving gantry, so the nozzle can reach faces a three-axis machine can only produce by printing sacrificial support and cutting it off afterwards.',
+          'The motion system is CoreXYAB: a flying gantry carries X and Y, while A and B come from a trunnion cradle holding the bed. Every part of the stack above it — kinematics, firmware, slicer — had to be written to match, because none of the off-the-shelf tooling understands five axes.',
         ],
-        'five-axis-printer': ['projects'],
-        'underwater-probe': ['projects'],
-        'piezo-microscope': ['projects'],
-        'personal-submarine': ['projects'],
-        'smaller-projects': ['projects'],
-      },
-      children: {
-        'smaller-projects': {
-          ids: [
-            'smaller-projects',
-            'iot-weather-station',
-            'gesture-drone-interface',
-            'autonomous-garden',
-            'holographic-display',
-            'neural-network-music',
-            'magnetic-levitation',
-          ],
-          edges: {
-            'smaller-projects': [
-              'iot-weather-station',
-              'gesture-drone-interface',
-              'autonomous-garden',
-              'holographic-display',
-              'neural-network-music',
-              'magnetic-levitation',
-            ],
-            'iot-weather-station': ['smaller-projects'],
-            'gesture-drone-interface': ['smaller-projects'],
-            'autonomous-garden': ['smaller-projects'],
-            'holographic-display': ['smaller-projects'],
-            'neural-network-music': ['smaller-projects'],
-            'magnetic-levitation': ['smaller-projects'],
-          },
+        media: {
+          kind: 'animation',
+          note: 'Loop — trunnion tilting through its A/B range with the gantry parked',
         },
       },
+      {
+        heading: 'Mechanism',
+        list: [
+          'CoreXYAB kinematics with a flying gantry for the linear axes',
+          'Custom-designed trunnion cradle carrying the rotary A and B axes',
+          'Belt paths routed to keep the gantry mass low and symmetric',
+          'Bearing and preload design sized around the tilted-bed load case',
+          'Cable management that survives full rotation without snagging',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — trunnion assembly, bearing blocks and belt routing',
+        },
+      },
+      {
+        heading: 'Firmware and slicing',
+        body: [
+          'The firmware runs the inverse kinematics for all five axes and adds the corrections the machine needs to print cleanly: adaptive bed meshing to compensate for the cradle geometry, and input shaping to cancel the ringing a flying gantry produces at speed.',
+          'Planar slicing throws away most of what the machine can do, so the slicer is optimisation-based — it chooses part orientation per region rather than committing to one build direction for the whole model.',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Screen capture — slicer solving orientation on an overhang-heavy part',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Kinematics', 'CoreXYAB, flying gantry, trunnion-mounted bed'],
+          ['Axes', 'X, Y, Z linear · A, B rotary'],
+          ['Firmware', 'Custom, with adaptive bed meshing and input shaping'],
+          ['Slicer', 'Optimisation-based, non-planar toolpaths'],
+          ['Design', 'Fusion 360'],
+        ],
+      },
+      {
+        heading: 'Where it stands',
+        body: [
+          'The machine prints, and steep overhangs come off the bed support-free — which was the whole reason for building it.',
+          'Current work is on the slicer: the orientation solver is the part that decides whether five axes are worth the mechanical complexity, and it is where most of the remaining gains are.',
+        ],
+      },
+    ],
+  },
+
+  'hydrogen-car': {
+    kind: 'project',
+    title: 'Hydrogen-Powered Car',
+    short: 'H₂ Car',
+    section: 'workshop',
+    icon: 'hydrogen',
+    meta: 'COSMOS, UCLA · Summer 2025',
+    status: 'Built',
+    parent: 'workshop',
+    tagline:
+      'A model car running on a custom reversible proton-exchange-membrane electrolyzer.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — the car on the test track, electrolyzer stack visible',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'Built at COSMOS UCLA: a hydrogen-powered vehicle whose interesting part is not the drivetrain but the cell. The same proton-exchange membrane stack runs in both directions — splitting water to store hydrogen, then recombining it to deliver power.',
+          'Running a PEM reversibly means one set of hardware has to be tolerable at two very different operating points, and neither is where a dedicated cell would be optimised.',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — electrolyzer stack, membrane and gas capture',
+        },
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Modelling the vehicle before building it, then reconciling the two',
+          'Designing and assembling a reversible PEM electrolyzer stack',
+          'Gas capture and storage sized to the run the car had to complete',
+          'Measuring round-trip efficiency across both modes of the cell',
+          'Coursework in carbon capture and green-energy infrastructure alongside the build',
+        ],
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Cell', 'Reversible proton-exchange membrane, custom stack'],
+          ['Modes', 'Electrolysis for storage · fuel cell for drive'],
+          ['Programme', 'COSMOS, UCLA — Summer 2025'],
+        ],
+      },
+      {
+        heading: 'What came out of it',
+        body: [
+          'The reversible cell is the honest lesson: the round-trip loss is large enough that reversibility only makes sense when the storage matters more than the efficiency. That framing carried into the carbon-capture side of the programme.',
+        ],
+      },
+    ],
+  },
+
+  'vtol-drone': {
+    kind: 'project',
+    title: 'VTOL Survey Drone',
+    short: 'VTOL',
+    section: 'workshop',
+    icon: 'drone',
+    meta: 'Personal build',
+    status: 'Flying',
+    parent: 'workshop',
+    tagline:
+      'A dynamic-flight VTOL airframe that identifies foliage from the air in real time.',
+    hero: {
+      kind: 'video',
+      note: 'Hero — transition from hover to forward flight, ground-camera view',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A drone for environmental monitoring that takes off vertically and then transitions to wing-borne flight, so it can launch from anywhere but still cover ground efficiently once it is up.',
+          'Onboard, a geometric context transformer classifies foliage as the aircraft flies, which means a survey produces a labelled map rather than a folder of images to sort through afterwards.',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — airframe on the ground, tilt mechanism and payload bay',
+        },
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Airframe design for two flight regimes with one set of surfaces',
+          'Flight-controller configuration through the hover-to-cruise transition',
+          'Onboard inference with a geometric context transformer',
+          'Real-time foliage identification tied to position data',
+          'Payload and power budgeting against endurance',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Overlay — live classification output over the flight camera feed',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Configuration', 'VTOL, dynamic flight transition'],
+          ['Perception', 'Geometric context transformer, onboard inference'],
+          ['Application', 'Foliage identification for environmental survey'],
+          ['Design', 'Fusion 360, custom flight-controller integration'],
+        ],
+      },
+    ],
+  },
+
+  'tshirt-cannon': {
+    kind: 'project',
+    title: 'Pneumatic T-Shirt Cannon',
+    short: 'Cannon',
+    section: 'workshop',
+    icon: 'cannon',
+    meta: 'Built for California High School events',
+    status: 'In service',
+    parent: 'workshop',
+    tagline: 'Three barrels, a two-stage supply, 200 psi, and a lot of margin.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — the cannon set up at a rally, all three barrels visible',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A three-barrel pneumatic launcher built for school events. Pressure comes from a two-stage system: a scuba tank as the high-pressure reservoir, regulated down into a fire extinguisher body that acts as the firing plenum at 200 psi.',
+          'Anything that stores this much energy and points at a crowd is a safety project first and a launcher second. Every component was chosen with a working pressure well above what the system can reach.',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — regulator, plenum and valve assembly',
+        },
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Two-stage supply: scuba tank reservoir regulated into a plenum',
+          'Three independently triggered barrels off a shared plenum',
+          'Fast-acting valve sizing so the shot uses the stored volume well',
+          'Pressure relief and burst-rating margin on every pressurised part',
+          'Range testing to set a safe operating pressure for indoor use',
+        ],
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Barrels', 'Three, independently triggered'],
+          ['Supply', 'Scuba tank reservoir into a fire-extinguisher plenum'],
+          ['Operating pressure', '200 psi'],
+        ],
+      },
+    ],
+  },
+
+  'iss-radio': {
+    kind: 'project',
+    title: 'Contacting the ISS',
+    short: 'ISS Radio',
+    section: 'workshop',
+    icon: 'antenna',
+    meta: 'Cal High Amateur Radio Club · K06MMZ',
+    status: 'Contact made',
+    parent: 'workshop',
+    tagline:
+      'A rooftop Yagi, a ten-minute pass, and a callsign on the other end at 7.66 km/s.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — rooftop Yagi against the sky, operator at the rig',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'Working the International Space Station — callsign NA1SS — from a rooftop-mounted Yagi. The station is only above the horizon for a few minutes at a time, so everything has to be aligned, tuned and tested before the pass begins.',
+          'The hard part is Doppler: the station closes and then opens at orbital speed, so the receive frequency shifts across the pass and has to be tracked while you are trying to make the contact.',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — antenna mount and feedline, pointed at the pass azimuth',
+        },
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Rooftop Yagi installation, aiming and feedline work',
+          'Pass prediction to know when the station is reachable and from where',
+          'Doppler correction across the pass',
+          'FCC Technician licensing and operation as K06MMZ',
+          'Over 100 contacts and dozens of nets logged through the club station',
+        ],
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Station', 'Cal High Amateur Radio Club'],
+          ['Callsign', 'K06MMZ — FCC-certified Technician'],
+          ['Antenna', 'Rooftop-mounted Yagi'],
+          ['Contact', 'NA1SS — International Space Station'],
+        ],
+      },
+    ],
+  },
+
+  // ── Code ────────────────────────────────────────────────────────────────
+  code: {
+    kind: 'section',
+    title: 'Code',
+    short: 'Code',
+    section: 'code',
+    icon: 'code',
+    tagline: 'Models, pipelines and one flight simulator.',
+    unit: 'projects',
+    intro:
+      'Software written to answer a question rather than to ship a product — mostly language models pointed at documents nobody wants to read by hand, plus a physics sandbox built for the fun of it.',
+    media: {
+      kind: 'animation',
+      note: 'Loop — the OSDR gap map rendering, or a terminal running the pipeline',
+    },
+    items: ['osdr-platform', 'market-nlp', 'flight-sim'],
+  },
+
+  'osdr-platform': {
+    kind: 'project',
+    title: 'NASA OSDR Research-Gap Platform',
+    short: 'OSDR',
+    section: 'code',
+    icon: 'dataset',
+    meta: 'NASA Ames Research Center · Summer 2026',
+    status: 'Deployed',
+    parent: 'code',
+    tagline:
+      'An NLP platform on NASA servers that maps where space-biology and crop-science research has not been done.',
+    hero: {
+      kind: 'animation',
+      note: 'Hero — the gap map, filtered from all organisms down to one',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'Built and deployed on NASA OSDR servers during an internship at Ames. The platform reads across the space-biology and crop-science literature and datasets and surfaces the gaps — the organism, tissue and condition combinations that nobody has run yet.',
+          'The reason this is worth automating is that the absence of a study is invisible when you are reading one paper at a time. It only appears once the whole corpus is in the same coordinate system.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'NLP pipeline over space-biology and crop-science literature',
+          'Analysis of paired terrestrial and spaceflight RNA-Seq datasets',
+          'Resolving sparsity where spaceflight sample counts are very low',
+          'Deployment onto NASA OSDR infrastructure',
+          'A Level-2 peer-reviewed report presented at the Ames OSTEM symposium',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Photo — presenting the report at the Ames OSTEM symposium',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Domain', 'Space biology and crop science'],
+          ['Data', 'Terrestrial and spaceflight RNA-Seq'],
+          ['Deployment', 'NASA OSDR servers, accessible across divisions'],
+          ['Output', 'Level-2 peer-reviewed report, Ames OSTEM symposium'],
+        ],
+      },
+      {
+        heading: 'The sparsity problem',
+        body: [
+          'Spaceflight datasets are small by nature — flights are rare and sample counts are tiny. Comparing them directly against the much deeper terrestrial record biases every result toward whatever the ground data says.',
+          'Most of the work went into handling that honestly, so a gap the platform reports is a real gap and not an artefact of how little flight data exists.',
+        ],
+      },
+    ],
+  },
+
+  'market-nlp': {
+    kind: 'project',
+    title: 'Quarterly-Report Analyser',
+    short: 'Reports',
+    section: 'code',
+    icon: 'trend',
+    meta: 'Personal project',
+    status: 'Working',
+    parent: 'code',
+    tagline:
+      'BERT and a PyTorch transformer reading company quarterly filings for signal.',
+    hero: {
+      kind: 'animation',
+      note: 'Hero — attention weights over a filing paragraph, or the prediction dashboard',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A model that reads company quarterly reports and turns the language in them into a forecast. Filings are long, formulaic and deliberately hedged, which makes them a good target: the informative part is in how something is said, not whether it is mentioned.',
+          'BERT handles the sentence-level encoding; a PyTorch transformer sits on top to read across sections of a filing and across filings over time.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Parsing and cleaning quarterly filings into usable text',
+          'Sentence-level encoding with BERT',
+          'A PyTorch transformer over the encoded document sequence',
+          'Framing the prediction target so the result is testable',
+          'Backtesting against subsequent reported performance',
+        ],
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Encoder', 'BERT'],
+          ['Model', 'PyTorch transformer over document sequence'],
+          ['Input', 'Company quarterly reports'],
+          ['Stack', 'Python, PyTorch, NumPy, Pandas'],
+        ],
+      },
+    ],
+  },
+
+  'flight-sim': {
+    kind: 'project',
+    title: 'Flight Simulator',
+    short: 'Flight Sim',
+    section: 'code',
+    icon: 'plane',
+    meta: 'Personal project',
+    status: 'Playable',
+    parent: 'code',
+    tagline: 'A Unity flying game built around the physics rather than around the game.',
+    hero: {
+      kind: 'video',
+      note: 'Hero — gameplay clip, a turn and a landing',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A flight game written in Unity where the flight model came first. Lift, drag and control authority are computed from the aircraft state rather than approximated with a scripted arcade feel.',
+          'Accurate physics makes a game harder to fly and much more satisfying when it works. Most of the development was spent on the boundary between the two.',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Loop — force vectors drawn on the aircraft during a turn',
+        },
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Aerodynamic force model driven by aircraft state',
+          'Control-surface authority that varies with airspeed',
+          'Stall and recovery behaviour that is recoverable but not free',
+          'Camera and input tuning so the model stays flyable',
+        ],
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Engine', 'Unity, C#'],
+          ['Focus', 'Physically grounded flight model'],
+        ],
+      },
+    ],
+  },
+
+  // ── Field notes ─────────────────────────────────────────────────────────
+  field: {
+    kind: 'section',
+    title: 'Field Notes',
+    short: 'Field',
+    section: 'field',
+    icon: 'field',
+    tagline: 'Research done outdoors, or about outdoors.',
+    unit: 'studies',
+    intro:
+      'Ecology and observational work — tide pools, watersheds, soil and, once, the weather on Jupiter. Different subjects, same method: collect carefully, compare against what was recorded before, and be honest about the noise.',
+    media: {
+      kind: 'photo',
+      note: 'Wide shot — fieldwork in progress, sampling or survey equipment',
+    },
+    items: ['fertilizer-runoff', 'sea-anemones', 'soil-survey', 'jupiter-weather'],
+  },
+
+  'fertilizer-runoff': {
+    kind: 'project',
+    title: 'Fertilizer Runoff',
+    short: 'Runoff',
+    section: 'field',
+    icon: 'flask',
+    meta: 'COSMOS, UCLA · Summer 2025',
+    status: 'Paper submitted',
+    parent: 'field',
+    tagline:
+      'Modelling and wet-lab testing of what agricultural runoff does to a body of water.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — wet lab bench, sample series showing the nutrient gradient',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A research project on how fertilizer runoff loads a body of water, combining mathematical modelling from the Sustainability Over Sets framework with wet-lab testing to check whether the model matched what actually happened in the water.',
+          'Runoff is a good modelling target because the failure is non-linear: nothing much happens as loading increases, and then the system tips.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Mathematical modelling of nutrient loading over time',
+          'Wet-lab testing across a controlled concentration series',
+          'Reconciling measured response against the modelled prediction',
+          'Leading the project team through design and analysis',
+          'Writing as lead student author on a paper submitted to AIChE',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Chart — modelled loading curve against measured lab results',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Programme', 'COSMOS, UCLA — Summer 2025'],
+          ['Method', 'Sustainability Over Sets modelling with wet-lab validation'],
+          ['Role', 'Project lead, lead student author'],
+          ['Output', 'Research paper submitted to AIChE'],
+        ],
+      },
+    ],
+  },
+
+  'sea-anemones': {
+    kind: 'project',
+    title: 'Sea Anemone Feeding',
+    short: 'Anemones',
+    section: 'field',
+    icon: 'wave',
+    meta: 'UC Santa Cruz, Seymour Center · Summer 2024',
+    status: 'Complete',
+    parent: 'field',
+    tagline:
+      'How feeding behaviour changes across tidal zones, checked against forty years of records.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — anemones in a tide pool at low tide, Natural Bridges',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'A field study on the eating patterns of sea anemone species across tidal regions, run in the Seymour Center wet lab at UC Santa Cruz with observations collected at Natural Bridges State Beach.',
+          'The value in the site is its history: the same location has been surveyed for four decades, so a season of new observations can be placed against a long baseline instead of standing alone.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Field observation across high, mid and low tidal regions',
+          'Wet-lab study of feeding response under controlled conditions',
+          'Tracking behaviour against temperature fluctuation and food availability',
+          'Treating each tidal band as its own micro-ecosystem',
+          'Comparison against forty years of historical survey data from the site',
+        ],
+        media: {
+          kind: 'photo',
+          note: 'Detail — wet lab setup at the Seymour Center',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Site', 'Seymour Center, UCSC · Natural Bridges State Beach'],
+          ['Variables', 'Tidal region, temperature, food availability'],
+          ['Baseline', '40 years of prior site data'],
+        ],
+      },
+    ],
+  },
+
+  'soil-survey': {
+    kind: 'project',
+    title: 'Soil pH and Plant Density',
+    short: 'Soil',
+    section: 'field',
+    icon: 'soil',
+    meta: 'Chabot Space & Science Center · Climate Technology Inquiry Team',
+    status: 'Ongoing',
+    parent: 'field',
+    tagline:
+      'Mapping how soil chemistry sets what grows, and how densely, in Joaquin Miller Park.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — sampling in Joaquin Miller Park, probe in the ground',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'Field survey work through the Climate Technology Inquiry Team at Chabot: sampling soil pH across Joaquin Miller Park and mapping it against which plant types appear and how densely they grow.',
+          'Putting the readings into ArcGIS is what turns a list of measurements into something you can read — the pattern is spatial, and it does not show up in a spreadsheet.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Soil pH sampling on a spatial grid across the park',
+          'Recording plant type and density alongside each sample',
+          'Building the survey into ArcGIS layers',
+          'Looking for correlation between soil chemistry and species distribution',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Map — ArcGIS layer, pH surface with plant density overlaid',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Site', 'Joaquin Miller Park, Oakland'],
+          ['Tools', 'ArcGIS, field sampling'],
+          ['Programme', 'Chabot Space & Science Center, Oakland Space Academy'],
+        ],
+      },
+    ],
+  },
+
+  'jupiter-weather': {
+    kind: 'project',
+    title: 'Weather on Jupiter',
+    short: 'Jupiter',
+    section: 'field',
+    icon: 'planet',
+    meta: 'Chabot Space & Science Center · Astronomy Inquiry Team',
+    status: 'Ongoing',
+    parent: 'field',
+    tagline:
+      'Using .fit captures to study how rotation and magnetic field hold Jupiter’s weather stable.',
+    hero: {
+      kind: 'photo',
+      note: 'Hero — processed Jupiter capture showing banding and the Great Red Spot',
+    },
+    sections: [
+      {
+        heading: 'Overview',
+        body: [
+          'Astronomy Inquiry Team work at Chabot, analysing .fit image captures to study how Jupiter’s very strong magnetic field and very fast rotation combine to keep its weather patterns stable over long periods.',
+          'Jupiter is the useful case precisely because its storms persist. On Earth a pressure system lasts days; there, the same features are still there decades later, which makes stability itself the thing to explain.',
+        ],
+      },
+      {
+        heading: 'What it involved',
+        list: [
+          'Working with .fit astronomical captures',
+          'Tracking band structure and storm features between sessions',
+          'Relating observed stability to rotation rate and magnetic field',
+          'Presenting the findings in planetarium sessions for visitors',
+        ],
+        media: {
+          kind: 'animation',
+          note: 'Sequence — banding tracked across captures taken weeks apart',
+        },
+      },
+      {
+        heading: 'Specifications',
+        specs: [
+          ['Data', '.fit captures'],
+          ['Subject', 'Band stability, rotation and magnetic field'],
+          ['Programme', 'Chabot Space & Science Center, Oakland Space Academy'],
+        ],
+      },
+    ],
+  },
+
+  // ── About ───────────────────────────────────────────────────────────────
+  about: {
+    kind: 'about',
+    title: 'About',
+    short: 'About',
+    section: 'about',
+    icon: 'about',
+    tagline:
+      'High school student in San Ramon, California, building machines and models.',
+    parent: 'home',
+    portrait: { kind: 'photo', note: 'Portrait — in the workshop or in the field' },
+    intro: [
+      'I am a student at California High School, class of 2027. Most of what is on this site started the same way: something looked interesting, reading about it was not enough, and building it turned out to be the fastest way to understand it.',
+      'The work splits roughly three ways — machines with moving parts, models that read documents or data, and fieldwork outdoors. They inform each other more than the categories suggest.',
+    ],
+    groups: [
+      {
+        heading: 'Where I have worked',
+        entries: [
+          [
+            'NASA Ames Research Center',
+            'Built and deployed an NLP research-gap platform on OSDR servers; presented a Level-2 peer-reviewed report at the Ames OSTEM symposium.',
+          ],
+          [
+            'Chabot Space & Science Center',
+            'Oakland Space Academy intern. Planetarium presentations and science demonstrations, plus the Astronomy and Climate Technology inquiry teams.',
+          ],
+          [
+            'COSMOS, UCLA',
+            'Led a research project on fertilizer runoff and built a hydrogen-powered car around a reversible PEM electrolyzer.',
+          ],
+          [
+            'UC Santa Cruz, Seymour Center',
+            'Designed and ran a field study on sea anemone feeding behaviour across tidal regions.',
+          ],
+        ],
+      },
+      {
+        heading: 'Tools',
+        entries: [
+          ['Design', 'Fusion 360, Blender, Techno CNC'],
+          ['Programming', 'Python, C, C++, C#, Java, Unity'],
+          ['Machine learning', 'PyTorch, BERT, spaCy, NumPy, Pandas'],
+          ['Hardware', 'PCB design, flight controllers, FPGA, Raspberry Pi, Arduino'],
+          ['Mapping', 'ArcGIS'],
+        ],
+      },
+      {
+        heading: 'Elsewhere',
+        entries: [
+          [
+            'Amateur radio',
+            'President of the Cal High Radio Club and FCC-certified Technician, callsign K06MMZ. Over 100 contacts logged, including the ISS.',
+          ],
+          [
+            'Robotics',
+            'VEX design award winner and board member; mentors incoming students and organises outreach events for local middle schools.',
+          ],
+          [
+            'EcoAlliance',
+            'Founder and president, running field-ecology activities aimed at data-driven conservation.',
+          ],
+          [
+            'Mathematics',
+            'AIME qualifier with distinction. First place worldwide at Purple Comet 2026; second overall at the UCLA Math Tournament.',
+          ],
+          [
+            'Scouting',
+            'Eagle Scout, Order of the Arrow. Led a 50-mile Philmont crew and a 15-scout build project for a local continuation school.',
+          ],
+        ],
+      },
+    ],
+    contact: {
+      label: 'Get in touch',
+      email: 'shauryachauhan2050@gmail.com',
     },
   },
 };
 
-/** Resolve a path like ['projects', 'smaller-projects'] to a graph level. */
-export const levelAt = (path) =>
-  path.reduce((level, id) => level.children?.[id] ?? level, graph);
+/** Navigation graph. `children` opens a nested level whose hub is the parent. */
+export const graph = {
+  ids: ['home', 'workshop', 'code', 'field', 'about'],
+  edges: {
+    home: ['workshop', 'code', 'field', 'about'],
+    workshop: ['home', 'code', 'field'],
+    code: ['home', 'workshop', 'field'],
+    field: ['home', 'workshop', 'code'],
+    about: ['home'],
+  },
+  children: {
+    workshop: {
+      ids: [
+        'workshop',
+        'five-axis-printer',
+        'hydrogen-car',
+        'vtol-drone',
+        'tshirt-cannon',
+        'iss-radio',
+        'home',
+      ],
+      edges: {
+        workshop: [
+          'five-axis-printer',
+          'hydrogen-car',
+          'vtol-drone',
+          'tshirt-cannon',
+          'iss-radio',
+          'home',
+        ],
+        'five-axis-printer': ['workshop'],
+        'hydrogen-car': ['workshop'],
+        'vtol-drone': ['workshop'],
+        'tshirt-cannon': ['workshop'],
+        'iss-radio': ['workshop'],
+      },
+    },
+    code: {
+      ids: ['code', 'osdr-platform', 'market-nlp', 'flight-sim', 'home'],
+      edges: {
+        code: ['osdr-platform', 'market-nlp', 'flight-sim', 'home'],
+        'osdr-platform': ['code'],
+        'market-nlp': ['code'],
+        'flight-sim': ['code'],
+      },
+    },
+    field: {
+      ids: [
+        'field',
+        'fertilizer-runoff',
+        'sea-anemones',
+        'soil-survey',
+        'jupiter-weather',
+        'home',
+      ],
+      edges: {
+        field: [
+          'fertilizer-runoff',
+          'sea-anemones',
+          'soil-survey',
+          'jupiter-weather',
+          'home',
+        ],
+        'fertilizer-runoff': ['field'],
+        'sea-anemones': ['field'],
+        'soil-survey': ['field'],
+        'jupiter-weather': ['field'],
+      },
+    },
+  },
+};
 
-/** The deepest path that contains `id`, so navigation can jump across levels. */
+/** The shallowest path whose level contains `id`. */
 export const pathTo = (id, level = graph, path = []) => {
   if (level.ids.includes(id)) return path;
   for (const [childId, childLevel] of Object.entries(level.children ?? {})) {
@@ -785,4 +853,15 @@ export const pathTo = (id, level = graph, path = []) => {
     if (found) return found;
   }
   return null;
+};
+
+/**
+ * The map level to draw for a given node. A node that opens into a level of
+ * its own shows that level, so travelling to a section is the same gesture as
+ * opening it — there is nothing extra to tap.
+ */
+export const levelFor = (id) => {
+  if (graph.children?.[id]) return graph.children[id];
+  const path = pathTo(id) ?? [];
+  return path.reduce((level, step) => level.children?.[step] ?? level, graph);
 };

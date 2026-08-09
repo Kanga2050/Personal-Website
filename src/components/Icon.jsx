@@ -1,9 +1,8 @@
 import React from 'react';
 
 /**
- * One stroked line-icon set for the whole site, so nothing relies on emoji
- * (which render differently on every platform and never match the type).
- * All glyphs are drawn on a 24x24 grid and inherit `currentColor`.
+ * One stroked line-icon set for the whole site. All glyphs are drawn on a
+ * 24x24 grid and inherit `currentColor`, so nothing depends on emoji.
  */
 const PATHS = {
   // — Chrome ————————————————————————————————————————————————
@@ -15,6 +14,9 @@ const PATHS = {
       <path d="M10.9 6.9 6.1 16.1M13.1 6.9l4.8 9.2M7.2 18h9.6" />
     </>
   ),
+  close: <path d="M18 6 6 18M6 6l12 12" />,
+  arrowLeft: <path d="M19 12H5M11 18l-6-6 6-6" />,
+  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
   sun: (
     <>
       <circle cx="12" cy="12" r="4" />
@@ -22,93 +24,53 @@ const PATHS = {
     </>
   ),
   moon: <path d="M20.5 14.8A8.6 8.6 0 0 1 9.2 3.5a8.8 8.8 0 1 0 11.3 11.3Z" />,
-  arrowLeft: <path d="M19 12H5M11 18l-6-6 6-6" />,
-  arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
-  close: <path d="M18 6 6 18M6 6l12 12" />,
-  cornerUpLeft: <path d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 6 6v5" />,
+  mail: (
+    <>
+      <rect x="3" y="5.5" width="18" height="13" rx="2" />
+      <path d="m3.8 7 8.2 6 8.2-6" />
+    </>
+  ),
 
   // — Sections ——————————————————————————————————————————————
-  engineering: (
+  home: (
+    <>
+      <path d="M3.5 11 12 3.6 20.5 11" />
+      <path d="M5.5 9.6V19a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.6" />
+      <path d="M10 20v-5.5h4V20" />
+    </>
+  ),
+  workshop: (
     <>
       <circle cx="12" cy="12" r="3" />
       <circle cx="12" cy="12" r="8" />
       <path d="M12 1.5V4M12 20v2.5M1.5 12H4M20 12h2.5M4.6 4.6 6.3 6.3M17.7 17.7l1.7 1.7M19.4 4.6l-1.7 1.7M6.3 17.7l-1.7 1.7" />
     </>
   ),
-  memories: (
+  code: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.8 4l-3.6 16" />,
+  field: (
     <>
-      <path d="M5 16.5 9.5 9l4 4.5L19 6" />
-      <circle cx="5" cy="16.5" r="1.5" />
-      <circle cx="9.5" cy="9" r="1.5" />
-      <circle cx="13.5" cy="13.5" r="1.5" />
-      <circle cx="19" cy="6" r="1.5" />
+      <path d="M2.5 18.5 8 10.5l4 5.2 3-3.9 6.5 6.7z" />
+      <circle cx="17" cy="5.8" r="2.4" />
     </>
   ),
-  projects: (
+  about: (
     <>
-      <rect x="3" y="3" width="7.5" height="7.5" rx="1.8" />
-      <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.8" />
-      <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.8" />
-      <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.8" />
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.6 20a7.4 7.4 0 0 1 14.8 0" />
     </>
   ),
 
-  // — Engineering domains ————————————————————————————————————
-  mechanical: (
-    <>
-      <circle cx="12" cy="6" r="2" />
-      <path d="M10.8 7.7 6 20M13.2 7.7 18 20M8.7 15h6.6" />
-    </>
-  ),
-  electronics: (
-    <>
-      <rect x="7" y="7" width="10" height="10" rx="2" />
-      <path d="M10 3v4M14 3v4M10 17v4M14 17v4M3 10h4M3 14h4M17 10h4M17 14h4" />
-    </>
-  ),
-  software: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.8 4l-3.6 16" />,
-
-  // — Project glyphs ————————————————————————————————————————
+  // — Projects ——————————————————————————————————————————————
   printer: (
     <>
       <path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z" />
       <path d="M4 7.5 12 12l8-4.5M12 12v9" />
     </>
   ),
-  probe: (
+  hydrogen: (
     <>
-      <path d="M12 3a3 3 0 0 1 3 3v8a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Z" />
-      <path d="M6.5 9.5a7 7 0 0 0 0 5M4 8a10 10 0 0 0 0 8M17.5 9.5a7 7 0 0 1 0 5M20 8a10 10 0 0 1 0 8" />
-    </>
-  ),
-  microscope: (
-    <>
-      <path d="M4 21h16" />
-      <path d="M8 21v-3h8v3" />
-      <path d="M11.5 16A5.5 5.5 0 0 1 10 6.4" />
-      <path d="m13.5 3.5 5 5-4.5 4.5-5-5 4.5-4.5Z" />
-    </>
-  ),
-  submarine: (
-    <>
-      <path d="M20 13c0 2.2-3.6 4-8 4s-8-1.8-8-4 3.6-4 8-4 8 1.8 8 4Z" />
-      <path d="M10.8 9.2V6.5h3v2.7M20 13h2M22 10.5v5" />
-      <circle cx="9" cy="13" r="1" />
-      <circle cx="14" cy="13" r="1" />
-    </>
-  ),
-  lab: (
-    <>
-      <path d="M9 3h6M10 3v6.2L4.9 18a2 2 0 0 0 1.7 3h10.8a2 2 0 0 0 1.7-3L14 9.2V3" />
-      <path d="M7.6 15h8.8" />
-    </>
-  ),
-
-  // — Lab experiments ———————————————————————————————————————
-  weather: (
-    <>
-      <path d="M17.5 17.5H7a4.5 4.5 0 0 1-.8-8.9A6 6 0 0 1 18 9.8a4 4 0 0 1-.5 7.7Z" />
-      <path d="M9 20v1.5M13 19.8v2M17 20v1.5" />
+      <path d="M12 3.2s6 6.3 6 10.1a6 6 0 0 1-12 0C6 9.5 12 3.2 12 3.2Z" />
+      <path d="M12.9 9.8 10.3 13.6h3.2l-2.4 3.6" />
     </>
   ),
   drone: (
@@ -121,24 +83,84 @@ const PATHS = {
       <circle cx="19" cy="19" r="2.2" />
     </>
   ),
-  garden: (
+  cannon: (
     <>
-      <path d="M4 20c0-8 6-14 16-14 0 10-6 14-13 14H4Z" />
-      <path d="M4 20c4-5 8-8 13-10" />
+      <path d="M4 10v4a1 1 0 0 0 1 1h2l10 3.6V5.4L7 9H5a1 1 0 0 0-1 1Z" />
+      <path d="M20.5 9.2v5.6" />
     </>
   ),
-  hologram: (
+  antenna: (
     <>
-      <path d="m12 3.5 6 3.5v7l-6 3.5-6-3.5v-7l6-3.5Z" />
-      <path d="m6 7 6 3.5L18 7M12 10.5v7" />
-      <path d="M4 21h16M8.5 21l1.2-1.8M15.5 21l-1.2-1.8" />
+      <circle cx="12" cy="10.5" r="1.8" />
+      <path d="M9.2 13.3a4 4 0 0 1 0-5.6M14.8 7.7a4 4 0 0 1 0 5.6" />
+      <path d="M6.4 16.1a8 8 0 0 1 0-11.2M17.6 4.9a8 8 0 0 1 0 11.2" />
+      <path d="M12 12.3V21M9 21h6" />
     </>
   ),
-  music: <path d="M4 14.5v-5M8 18.5v-13M12 21V3M16 18.5v-13M20 14.5v-5" />,
-  magnet: (
+  dataset: (
     <>
-      <path d="M6 4h5v8a1 1 0 0 0 2 0V4h5v8a6 6 0 0 1-12 0V4Z" />
-      <path d="M6 9h5M13 9h5" />
+      <ellipse cx="12" cy="6" rx="7" ry="3" />
+      <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
+      <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+    </>
+  ),
+  trend: (
+    <>
+      <path d="M3 17.5 8.5 12l3.5 3.5L21 6.5" />
+      <path d="M15 6.5h6v6" />
+    </>
+  ),
+  plane: (
+    <path d="M12 3c1 0 1.6 1.2 1.6 3v3.3l7.4 4.3v2.2l-7.4-2.2v3.6l2.4 1.7v1.5L12 19.6l-4 .8v-1.5l2.4-1.7v-3.6L3 15.8v-2.2l7.4-4.3V6c0-1.8.6-3 1.6-3Z" />
+  ),
+  flask: (
+    <>
+      <path d="M9 3h6M10 3v6.2L4.9 18a2 2 0 0 0 1.7 3h10.8a2 2 0 0 0 1.7-3L14 9.2V3" />
+      <path d="M7.6 15h8.8" />
+    </>
+  ),
+  wave: (
+    <path d="M2 7.5c2.5-2 5-2 7.5 0s5 2 7.5 0 4.5-2 4.5-2M2 12.5c2.5-2 5-2 7.5 0s5 2 7.5 0 4.5-2 4.5-2M2 17.5c2.5-2 5-2 7.5 0s5 2 7.5 0 4.5-2 4.5-2" />
+  ),
+  soil: (
+    <>
+      <path d="M3 15h18M3 19h18" />
+      <path d="M12 12V8.4" />
+      <path d="M12 9.4c0-2.2 1.6-3.9 3.9-3.9 0 2.3-1.7 3.9-3.9 3.9ZM12 9.4c0-2.2-1.6-3.9-3.9-3.9 0 2.3 1.7 3.9 3.9 3.9Z" />
+    </>
+  ),
+  planet: (
+    <>
+      <circle cx="12" cy="12" r="6.4" />
+      <ellipse
+        cx="12"
+        cy="12"
+        rx="11"
+        ry="3.4"
+        transform="rotate(-22 12 12)"
+      />
+    </>
+  ),
+
+  // — Media placeholders ————————————————————————————————————
+  photo: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <circle cx="8.6" cy="10" r="1.7" />
+      <path d="m4 17.4 4.9-4.4 3.9 3.4 3-2.5 4.2 3.5" />
+    </>
+  ),
+  video: (
+    <>
+      <rect x="3" y="6" width="12.5" height="12" rx="2.5" />
+      <path d="m16 11 5-3v8l-5-3z" />
+    </>
+  ),
+  animation: (
+    <>
+      <path d="M20.5 12a8.5 8.5 0 1 1-2.9-6.4" />
+      <path d="M21 3.5v5h-5" />
+      <circle cx="12" cy="12" r="2.6" />
     </>
   ),
 };

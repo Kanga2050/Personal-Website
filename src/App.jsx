@@ -1,13 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { AnimatePresence } from 'framer-motion';
 import ErrorBoundary from './components/ErrorBoundary';
-import NavMap from './components/NavMap';
-import StartPage from './pages/StartPage';
-import UniversePage from './pages/UniversePage';
-import MemoriesPage from './pages/MemoriesPage';
-import CollectionPage from './pages/CollectionPage';
-import DetailPage from './pages/DetailPage';
-import { nodes, levelAt, pathTo } from './data/site';
+import NavigationMenu from './components/NavigationMenu';
+import { ParallaxProvider } from './scene/Parallax';
+import { WindProvider } from './scene/Wind';
+import { PaintDefs } from './scene/Paint';
+import HomePage from './pages/HomePage';
+import SectionPage from './pages/SectionPage';
+import ProjectPage from './pages/ProjectPage';
+import AboutPage from './pages/AboutPage';
+import { nodes, levelFor } from './data/site';
+import { applyPalette } from './theme/palette';
 
 const isNightNow = () => {
   const hour = new Date().getHours();
@@ -15,87 +24,96 @@ const isNightNow = () => {
 };
 
 const App = () => {
-  const [current, setCurrent] = useState('start');
-  const [path, setPath] = useState([]);
-  const [isNight, setIsNight] = useState(isNightNow);
+  const [current, setCurrent] = useState('home');
+  const [night, setNight] = useState(isNightNow);
 
-  const level = useMemo(() => levelAt(path), [path]);
+  const node = nodes[current];
+  const level = useMemo(() => levelFor(current), [current]);
 
-  /** Move to a node, opening whichever graph level actually holds it. */
+  // Palette first, before paint, so a page never flashes the wrong light.
+  useLayoutEffect(() => {
+    applyPalette(node?.section ?? 'home', night);
+  }, [node, night]);
+
   const navigate = useCallback((id) => {
-    const target = pathTo(id);
-    if (!target) {
-      console.warn(`No graph level contains '${id}'`);
+    if (!nodes[id]) {
+      console.warn(`No such node: '${id}'`);
       return;
     }
-    setPath(target);
     setCurrent(id);
   }, []);
 
-  /** Descend into the level a hub node contains. */
-  const enterLevel = useCallback(
-    (id) => {
-      if (!level.children?.[id]) return;
-      setPath((previous) => [...previous, id]);
-    },
-    [level],
-  );
-
-  /** Step back out to the parent level, landing on the hub we came through. */
-  const exitLevel = useCallback(() => {
-    if (path.length === 0) return;
-    setCurrent(path[path.length - 1]);
-    setPath(path.slice(0, -1));
-  }, [path]);
-
-  const toggleTime = useCallback(() => setIsNight((value) => !value), []);
+  const toggleTime = useCallback(() => setNight((value) => !value), []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const title = current === 'start' ? null : nodes[current]?.title;
-    document.title = title ? `${title} — Universe` : 'Universe';
-  }, [current]);
+    document.title =
+      current === 'home'
+        ? 'Shaurya Chauhan'
+        : `${node?.title} — Shaurya Chauhan`;
+  }, [current, node]);
 
   const page = useMemo(() => {
-    if (current === 'start') {
-      return <StartPage key="start" onEnter={() => navigate('universe')} />;
-    }
-    if (current === 'universe') {
-      return (
-        <UniversePage key="universe" isNight={isNight} onNavigate={navigate} />
-      );
-    }
-    if (current === 'memories') {
-      return <MemoriesPage key="memories" onNavigate={navigate} />;
-    }
-
-    const node = nodes[current];
     if (!node) return null;
 
-    return node.kind === 'collection' ? (
-      <CollectionPage key={current} node={node} onNavigate={navigate} />
-    ) : (
-      <DetailPage key={current} node={node} onNavigate={navigate} />
-    );
-  }, [current, isNight, navigate]);
+    switch (node.kind) {
+      case 'home':
+        return (
+          <HomePage
+            key="home"
+            night={night}
+            onNavigate={navigate}
+            onToggleTime={toggleTime}
+          />
+        );
+      case 'section':
+        return (
+          <SectionPage
+            key={current}
+            node={node}
+            night={night}
+            onNavigate={navigate}
+            onToggleTime={toggleTime}
+          />
+        );
+      case 'about':
+        return (
+          <AboutPage
+            key={current}
+            node={node}
+            night={night}
+            onNavigate={navigate}
+            onToggleTime={toggleTime}
+          />
+        );
+      default:
+        return (
+          <ProjectPage
+            key={current}
+            node={node}
+            night={night}
+            onNavigate={navigate}
+            onToggleTime={toggleTime}
+          />
+        );
+    }
+  }, [current, node, night, navigate, toggleTime]);
 
   return (
     <ErrorBoundary>
-      {current !== 'start' && (
-        <NavMap
-          level={level}
-          currentNode={current}
-          path={path}
-          onNavigate={navigate}
-          onEnter={enterLevel}
-          onExit={exitLevel}
-          showTimeToggle={current === 'universe'}
-          isNight={isNight}
-          onToggleTime={toggleTime}
-        />
-      )}
-
-      <AnimatePresence mode="wait">{page}</AnimatePresence>
+      <ParallaxProvider>
+        <WindProvider>
+          {/* The paint box: filters and gradients every scene references by id. */}
+          <PaintDefs />
+          <NavigationMenu
+            level={level}
+            currentNode={current}
+            isNight={night}
+            onNavigate={navigate}
+          />
+          <AnimatePresence mode="wait">{page}</AnimatePresence>
+        </WindProvider>
+      </ParallaxProvider>
     </ErrorBoundary>
   );
 };

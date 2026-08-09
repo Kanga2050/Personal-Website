@@ -1,46 +1,49 @@
 /* ==========================================================================
-   Design system
-   Every page is built from these primitives. Per-section colour comes in as
-   the --accent / --accent-2 custom properties, set by <Page>.
+   A painted landscape you can walk around in.
+
+   Colour comes from custom properties written by src/theme/palette.js. The
+   global transition below is what turns a palette swap into a sunset rather
+   than a jump-cut; the sky itself is two stacked paintings that cross-fade,
+   because CSS gradients cannot interpolate.
    ========================================================================== */
 
 :root {
-  /* Surface */
-  --bg: #06070b;
-  --surface: rgba(255, 255, 255, 0.035);
-  --surface-hover: rgba(255, 255, 255, 0.065);
-  --border: rgba(255, 255, 255, 0.1);
-  --border-hover: rgba(255, 255, 255, 0.2);
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', Palatino,
+    'Times New Roman', serif;
+  --sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
 
-  /* Type */
-  --text: #eceff6;
-  --text-muted: #98a2b6;
-  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-
-  /* Accent — overridden per page */
-  --accent: #f5c542;
-  --accent-2: #ff9f43;
-
-  /* Geometry */
-  --radius: 16px;
-  --radius-sm: 10px;
-  --shell: 1080px;
-
-  /* Motion — one easing curve and three durations for the whole site */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --fast: 0.18s;
-  --base: 0.32s;
-  --slow: 0.6s;
+  --soft: cubic-bezier(0.4, 0, 0.2, 1);
+  --light-shift: 2.4s;
 
-  color-scheme: dark;
+  /* Celestial arc: radius, and how far its centre sits below the horizon. */
+  --orbit-r: 100vh;
+  --orbit-c: 20vh;
+
+  /* Sensible values for the first paint, before JS writes the real palette. */
+  --ink: #33402f;
+  --ink-soft: #5f6f56;
+  --accent: #c47a2c;
+  --paper: rgba(255, 251, 241, 0.84);
+  --paper-edge: rgba(96, 78, 54, 0.2);
+  --paper-ink: #3d3527;
+  --on-accent: #fffaf0;
+  --scrim: rgba(255, 248, 232, 0.28);
 }
 
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* One long, shared fade for everything the sun touches. Components that need
+   a snappier hover declare their own `transition` shorthand, which wins. */
+* {
+  transition-property: color, background-color, border-color, fill, stroke;
+  transition-duration: var(--light-shift);
+  transition-timing-function: var(--soft);
 }
 
 html,
@@ -51,11 +54,11 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font);
+  background: #0a1230;
+  color: var(--ink);
+  font-family: var(--sans);
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.65;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -67,7 +70,9 @@ h3,
 p,
 ul,
 ol,
-figure {
+figure,
+dl,
+dd {
   margin: 0;
 }
 
@@ -85,401 +90,957 @@ button {
   cursor: pointer;
 }
 
+a {
+  color: inherit;
+}
+
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 3px;
-  border-radius: 4px;
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--accent) 35%, transparent);
+  background: color-mix(in srgb, var(--accent) 32%, transparent);
 }
 
 /* ==========================================================================
-   Page shell
+   Paper
+   ========================================================================== */
+
+/* The filter library. It must stay in the layout with a real box — a
+   `display: none` subtree does not resolve `url(#…)` filter references. */
+.paint-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Cold-pressed paper, multiplied over the whole page. This is the difference
+   between "an illustration on a screen" and "a painting": the flat areas
+   between the painted elements get the same tooth as the washes do. */
+.grain {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.55;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23p)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+/* Multiply on a dark ground only ever goes blacker, so at night the paper
+   lightens instead — same texture, opposite operation. */
+[data-time='night'] .grain {
+  mix-blend-mode: overlay;
+  opacity: 0.24;
+}
+
+/* Where the wash ran out at the edge of the sheet. */
+.grain__edge {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(
+    118% 96% at 50% 44%,
+    transparent 58%,
+    var(--pool) 100%
+  );
+  opacity: 0.5;
+}
+
+/* The cut between pages: a sheet of paper closing over one and opening on the
+   next. It sits above the scenery and below the map. */
+.wash {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  background: var(--haze);
+}
+
+/* ==========================================================================
+   Scene
+   ========================================================================== */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* `clip`, not `hidden`: `hidden` makes this a scroll container, and
+     scrolling a below-horizon sun into view drags the whole painting with it. */
+  overflow: clip;
+  pointer-events: none;
+}
+
+.scene__sky {
+  position: absolute;
+  inset: 0;
+}
+
+/* A cel sky is never one ramp. This is the reference painting's: a saturated
+   cerulean at the zenith, thinning through cyan, then a band of warm pink
+   sitting on top of the haze at the horizon. */
+.scene__sky--day {
+  background: linear-gradient(
+    180deg,
+    #2f7fd0 0%,
+    #58a8e0 24%,
+    #8fcbe9 46%,
+    #c2e2ee 64%,
+    #f4cdd2 84%,
+    #ffdfc6 100%
+  );
+}
+
+.scene__sky--night {
+  background: linear-gradient(
+    180deg,
+    #050b22 0%,
+    #0c1c44 28%,
+    #17305e 56%,
+    #2a3d6c 80%,
+    #3b4570 100%
+  );
+}
+
+/* Light pooling where the sky meets the hills. Cel skies are never a single
+   ramp — there is always a bloom sitting on the horizon line. */
+.scene__horizon-glow {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 62%;
+  background: radial-gradient(
+    120% 100% at 50% 100%,
+    color-mix(in srgb, var(--glow) 40%, transparent) 0%,
+    transparent 62%
+  );
+  opacity: 0.55;
+}
+
+.scene__stars {
+  position: absolute;
+  inset: 0 0 auto 0;
+  width: 100%;
+  height: 72%;
+}
+
+/* — Sun and moon, half a turn apart on one arc ————————————————— */
+
+.scene__orbit {
+  position: absolute;
+  left: 60%;
+  bottom: calc(-1 * (var(--orbit-r) + var(--orbit-c)));
+  width: calc(var(--orbit-r) * 2);
+  height: calc(var(--orbit-r) * 2);
+  margin-left: calc(-1 * var(--orbit-r));
+  border-radius: 50%;
+}
+
+/* On interior pages the arc swings out to the margin so the sun never sits
+   behind the headline. */
+.scene--page .scene__orbit {
+  left: 87%;
+}
+
+.scene__body {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.scene__body--top {
+  top: 0;
+}
+
+.scene__body--bottom {
+  top: 100%;
+}
+
+.scene__sun,
+.scene__moon {
+  position: relative;
+  display: block;
+  border-radius: 50%;
+  pointer-events: auto;
+  transition: transform 0.4s var(--ease), filter 0.4s var(--ease);
+}
+
+.scene__sun:disabled,
+.scene__moon:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.scene__sun:not(:disabled):hover,
+.scene__moon:not(:disabled):hover {
+  transform: scale(1.06);
+  filter: brightness(1.08);
+}
+
+.scene__sun {
+  width: clamp(66px, 8vw, 116px);
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle at 38% 34%,
+    #fffdf0 0%,
+    #ffe6a5 45%,
+    #ffc65e 100%
+  );
+  box-shadow:
+    0 0 70px 26px rgba(255, 214, 125, 0.42),
+    0 0 180px 80px rgba(255, 196, 110, 0.2);
+}
+
+.scene__sun-glow {
+  position: absolute;
+  inset: -46%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 226, 160, 0.4) 0%,
+    transparent 68%
+  );
+  animation: breathe 7s var(--soft) infinite;
+}
+
+.scene__moon {
+  width: clamp(54px, 6.2vw, 92px);
+  aspect-ratio: 1;
+  background: radial-gradient(
+    circle at 40% 36%,
+    #fdfbf1 0%,
+    #eae5d2 58%,
+    #c8c4b4 100%
+  );
+  box-shadow:
+    0 0 60px 20px rgba(220, 232, 255, 0.24),
+    0 0 150px 60px rgba(150, 180, 255, 0.14);
+}
+
+.scene__moon-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 66% 34%, rgba(160, 156, 140, 0.5) 0 12%, transparent 13%),
+    radial-gradient(circle at 40% 66%, rgba(160, 156, 140, 0.42) 0 9%, transparent 10%),
+    radial-gradient(circle at 30% 34%, rgba(160, 156, 140, 0.3) 0 6%, transparent 7%);
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* — Clouds and bands ——————————————————————————————————————— */
+
+.scene__clouds {
+  position: absolute;
+  inset: 0;
+}
+
+/* No blur here — the bleed filter inside the SVG already softens the edge, and
+   stacking a CSS blur on top of it turns the cumulus to fog. */
+.scene__cloud {
+  position: absolute;
+  left: 0;
+}
+
+.scene__birds {
+  position: absolute;
+  left: 0;
+  top: 21%;
+}
+
+/* The nearest grass, standing on the very bottom edge of the frame. */
+.scene__fringe {
+  position: absolute;
+  left: -4%;
+  bottom: -1%;
+  width: 108%;
+  height: 7%;
+}
+
+.scene__fringe svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.scene--page .scene__fringe {
+  height: 4.5%;
+  opacity: 0.85;
+}
+
+.scene__band {
+  position: absolute;
+  left: -7%;
+  bottom: 0;
+  width: 114%;
+}
+
+.scene__band svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.scene__band--ridge {
+  height: 55%;
+}
+.scene__band--far {
+  height: 42%;
+}
+.scene__band--mid {
+  height: 34%;
+}
+.scene__band--near {
+  height: 24%;
+}
+.scene__band--ground {
+  height: 14%;
+}
+
+/* Interior pages drop the horizon so the text has somewhere quiet to sit. */
+.scene--page .scene__band--ridge {
+  height: 34%;
+}
+.scene--page .scene__band--far {
+  height: 26%;
+}
+.scene--page .scene__band--mid {
+  height: 20%;
+}
+.scene--page .scene__band--near {
+  height: 14%;
+}
+.scene--page .scene__band--ground {
+  height: 8%;
+}
+
+.scene__motes {
+  position: absolute;
+  inset: 0;
+  /* Canvas is a replaced element: without this it keeps its intrinsic size. */
+  width: 100%;
+  height: 100%;
+}
+
+.scene__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    var(--scrim) 0%,
+    transparent 34%,
+    transparent 66%,
+    var(--scrim) 100%
+  );
+  opacity: 0;
+}
+
+.scene--page .scene__scrim {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   Rooms
+
+   A room is the same plane stack as the landscape, turned inward. It reuses
+   `.scene` for the fixed full-bleed frame, so the parallax, the motes and the
+   paper all behave identically indoors.
+   ========================================================================== */
+
+.room {
+  background: var(--plank-dark);
+}
+
+/* Oversized, so a plane shifted by the parallax never uncovers an edge. */
+.room__layer {
+  position: absolute;
+  left: -5%;
+  top: -5%;
+  width: 110%;
+  height: 110%;
+}
+
+.room__plane {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* — The window ——————————————————————————————————————————— */
+
+.room__window {
+  position: absolute;
+  z-index: 4;
+}
+
+.room__window--sash {
+  left: 3.5%;
+  top: 9%;
+  width: clamp(190px, 24%, 380px);
+  height: 34%;
+}
+
+.room__window--round {
+  left: 4%;
+  top: 11%;
+  width: clamp(180px, 22%, 330px);
+  aspect-ratio: 1;
+  height: auto;
+}
+
+.room__window--tall {
+  left: 3.5%;
+  top: 7%;
+  width: clamp(170px, 20%, 300px);
+  height: 44%;
+}
+
+.room__glass {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  box-shadow: inset 0 0 34px 6px var(--room-shade);
+}
+
+.room__window--round .room__glass {
+  border-radius: 50%;
+}
+
+/* A porthole is a ring, not a sash — the frame SVG would only fight it. */
+.room__window--round .room__frame {
+  display: none;
+}
+
+.room__window--round::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
+  border: 11px solid var(--wood);
+  box-shadow: inset 0 0 0 3px var(--plank-dark);
+}
+
+.room__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.room__view {
+  position: absolute;
+  inset: auto 0 0 0;
+  width: 100%;
+  height: 46%;
+}
+
+.room__drift {
+  position: absolute;
+  left: 0;
+  top: 16%;
+  width: 62%;
+}
+
+.room__drift svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* The sun through a pane is a long way off; at landscape size it would fill
+   the opening. */
+.room__body {
+  position: absolute;
+  left: 46%;
+  top: 10%;
+}
+
+.room__body .scene__sun {
+  width: clamp(30px, 3.4vw, 54px);
+  box-shadow:
+    0 0 34px 12px rgba(255, 214, 125, 0.4),
+    0 0 90px 34px rgba(255, 196, 110, 0.2);
+}
+
+.room__body .scene__moon {
+  width: clamp(26px, 2.8vw, 44px);
+  box-shadow:
+    0 0 30px 10px rgba(220, 232, 255, 0.24),
+    0 0 76px 28px rgba(150, 180, 255, 0.14);
+}
+
+/* — Light in the room ——————————————————————————————————————— */
+
+/* Daylight thrown in from the window and falling off across the floor. */
+.room__shaft {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    108deg,
+    color-mix(in srgb, var(--lamp) 24%, transparent) 0%,
+    color-mix(in srgb, var(--lamp) 8%, transparent) 26%,
+    transparent 52%
+  );
+}
+
+.room__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    104% 88% at 26% 34%,
+    transparent 42%,
+    var(--room-shade) 100%
+  );
+}
+
+.room__steam {
+  position: absolute;
+  left: 79%;
+  bottom: 21%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.room__steam span {
+  position: absolute;
+  display: block;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--cloud);
+  filter: blur(7px);
+}
+
+@media (max-width: 760px) {
+  /* The room is cropped hard here, and a window in the corner would land on
+     top of the pegboard or the shelves. Across the top it reads as a clerestory
+     and clears everything. */
+  .room__window,
+  .room__window--sash,
+  .room__window--round,
+  .room__window--tall {
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 23%;
+    aspect-ratio: auto;
+  }
+
+  .room__window--round .room__glass {
+    border-radius: 0;
+  }
+
+  .room__window--round .room__frame {
+    display: block;
+  }
+
+  .room__window--round::after {
+    display: none;
+  }
+
+  .room__body {
+    left: 62%;
+  }
+
+  /* Start the content below the clerestory rather than behind it. */
+  .page--indoors .page__content {
+    padding-top: 28vh;
+  }
+}
+
+/* ==========================================================================
+   Home
+   ========================================================================== */
+
+.home {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: clip;
+}
+
+.home__title {
+  position: absolute;
+  z-index: 30;
+  /* Purely typographic — it must never swallow a tap meant for the sky. */
+  pointer-events: none;
+  left: clamp(20px, 6vw, 92px);
+  top: clamp(96px, 17vh, 190px);
+  max-width: min(30ch, 42vw);
+}
+
+.home__eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.home__name {
+  font-family: var(--serif);
+  font-size: clamp(2.9rem, 7.5vw, 5.6rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  color: var(--ink);
+  margin: 0.18em 0 0.34em;
+  text-shadow: 0 2px 26px rgba(255, 255, 255, 0.18);
+}
+
+[data-time='night'] .home__name {
+  text-shadow: 0 2px 34px rgba(120, 150, 220, 0.28);
+}
+
+.home__lede {
+  font-size: clamp(1rem, 1.4vw, 1.15rem);
+  color: var(--ink-soft);
+  max-width: 34ch;
+}
+
+.home__spot {
+  position: absolute;
+  z-index: 20;
+}
+
+/* — Landmarks ——————————————————————————————————————————— */
+
+.landmark {
+  position: relative;
+  display: block;
+  width: var(--landmark-width);
+  margin-left: calc(var(--landmark-width) / -2);
+}
+
+.landmark__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 10px 18px rgba(12, 20, 10, 0.28));
+}
+
+/* Labels sit above their landmark: they stay in open sky, never collide with
+   the hill the object is standing on, and never clip off the bottom edge. */
+.landmark__plate {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 10px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  white-space: nowrap;
+}
+
+/* Dark ink in a bright halo by day, pale ink in a dark one at night — a single
+   colour cannot stay legible against both a lit hillside and a night sky. */
+.landmark__label {
+  position: relative;
+  font-family: var(--serif);
+  font-size: clamp(1rem, 1.6vw, 1.24rem);
+  color: var(--ink);
+  text-shadow:
+    0 0 3px rgba(255, 253, 244, 0.95),
+    0 1px 14px rgba(255, 253, 244, 0.85);
+}
+
+[data-time='night'] .landmark__label {
+  color: #f6f1e2;
+  text-shadow:
+    0 0 4px rgba(8, 14, 30, 0.9),
+    0 2px 16px rgba(8, 14, 30, 0.8);
+}
+
+.landmark__label::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.4s var(--ease);
+}
+
+.landmark:hover .landmark__label::after,
+.landmark:focus-visible .landmark__label::after {
+  transform: scaleX(1);
+}
+
+.landmark__hint {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  text-shadow: 0 0 8px rgba(255, 253, 244, 0.9);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+
+[data-time='night'] .landmark__hint {
+  text-shadow: 0 0 8px rgba(8, 14, 30, 0.9);
+}
+
+.landmark:hover .landmark__hint,
+.landmark:focus-visible .landmark__hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 760px) {
+  .home__title {
+    left: 20px;
+    right: 20px;
+    top: 116px;
+    max-width: none;
+  }
+
+  /* Swing the arc clear of both the headline and the map button. */
+  .scene__orbit {
+    left: 62%;
+    --orbit-c: 5vh;
+  }
+
+  .scene--page .scene__orbit {
+    left: 55%;
+  }
+
+  .home__lede {
+    max-width: none;
+  }
+
+  .landmark__hint {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   Interior pages
    ========================================================================== */
 
 .page {
   position: relative;
   min-height: 100vh;
   min-height: 100dvh;
+}
+
+/* The deck the content rides on. The perspective here is what turns <Reveal>'s
+   z travel into blocks swinging up out of the scene rather than sliding. */
+.page__content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow-x: clip;
-  isolation: isolate;
-}
-/* `min-height` rather than `height` means centring only applies while the
-   content is shorter than the viewport; taller pages simply flow. */
-
-/* Two soft accent washes: one behind the content, one bleeding off the base. */
-.page__wash {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      68vw 52vh at 50% -8%,
-      color-mix(in srgb, var(--accent) 20%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      52vw 46vh at 92% 104%,
-      color-mix(in srgb, var(--accent-2) 16%, transparent),
-      transparent 70%
-    ),
-    var(--bg);
-}
-
-/* Faint grid, so the background reads as space rather than a flat fill. */
-.page__grid {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.35;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: radial-gradient(80% 70% at 50% 40%, #000 20%, transparent 100%);
-}
-
-.page__field {
-  position: fixed;
-  inset: 0;
-  /* A canvas is a replaced element: without this it stays at its intrinsic
-     300x150 instead of stretching to the inset. */
-  width: 100%;
-  height: 100%;
-  z-index: -1;
+  gap: clamp(28px, 5vh, 54px);
+  padding: clamp(120px, 16vh, 180px) clamp(20px, 5vw, 40px)
+    clamp(120px, 16vh, 180px);
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+  /* The column is full-bleed on narrow screens, and its padding would
+     otherwise swallow taps meant for the sun sitting in the sky behind it. */
   pointer-events: none;
 }
 
-.shell {
-  position: relative;
-  width: 100%;
-  max-width: var(--shell);
-  margin-inline: auto;
-  padding: clamp(96px, 13vh, 140px) clamp(20px, 5vw, 40px);
+.page__content > * {
+  transform-style: preserve-3d;
+  pointer-events: auto;
 }
 
-.shell--narrow {
-  max-width: 720px;
+.page__content--article {
+  max-width: 800px;
 }
 
-/* Long-form reading measure: keeps panels close to the text they hold. */
-.shell--article {
-  max-width: 840px;
+.page__content--wide {
+  max-width: 1000px;
 }
 
-.shell--center {
-  text-align: center;
+/* Indoors the light comes through a window in the left wall, and a centred
+   column would sit across it. Once there is room to, the column steps aside
+   and lets the window be a window. */
+@media (min-width: 1024px) {
+  .page--indoors .page__content {
+    max-width: 880px;
+    margin-left: clamp(400px, 31vw, 480px);
+    margin-right: auto;
+  }
 }
 
-/* ==========================================================================
-   Typography
-   ========================================================================== */
+.lede-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* The header floats on the scenery rather than on paper, so it carries its own
+   ground: dark ink in a bright halo by day, pale ink in a dark one at night.
+   One colour cannot hold up against both a lit hillside and a night sky. */
+.lede-block .eyebrow,
+.lede-block .display,
+.lede-block .lede,
+.lede-block .byline,
+.home__eyebrow,
+.home__lede {
+  text-shadow:
+    0 0 4px var(--halo),
+    0 0 12px var(--halo),
+    0 1px 20px var(--halo);
+}
+
+/* A pegboard is a far busier ground than a sky. The softened ink that reads as
+   quiet outdoors disappears into it, so indoors the lede takes full strength. */
+.page--indoors .lede-block .lede,
+.page--indoors .lede-block .byline {
+  color: var(--ink);
+  opacity: 1;
+}
 
 .eyebrow {
-  font-family: var(--font-mono);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-size: 12px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--accent);
-  opacity: 0.85;
 }
 
 .display {
-  font-size: clamp(2.75rem, 8vw, 5rem);
-  line-height: 1.03;
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 5.4vw, 3.6rem);
   font-weight: 600;
-  letter-spacing: -0.03em;
-  background: linear-gradient(100deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.title {
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  line-height: 1.1;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  background: linear-gradient(100deg, var(--accent), var(--accent-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.heading {
-  font-size: clamp(1.1rem, 2vw, 1.3rem);
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--text);
+  line-height: 1.06;
+  letter-spacing: -0.022em;
+  color: var(--ink);
 }
 
 .lede {
-  font-size: clamp(1rem, 1.6vw, 1.175rem);
-  line-height: 1.65;
-  color: var(--text-muted);
-  max-width: 62ch;
+  font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 58ch;
 }
 
-.shell--center .lede {
-  margin-inline: auto;
+.byline {
+  font-size: 0.84rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-soft);
+  opacity: 0.82;
 }
 
-.body {
-  color: var(--text-muted);
-  max-width: 68ch;
+/* — Paper sheet ————————————————————————————————————————— */
+
+.sheet {
+  border-radius: 24px;
+  padding: clamp(24px, 4vw, 46px);
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow: 0 30px 70px -50px rgba(22, 16, 6, 0.7);
+  color: var(--paper-ink);
 }
 
-.body strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-/* ==========================================================================
-   Layout helpers
-   ========================================================================== */
-
-.stack {
-  display: flex;
-  flex-direction: column;
-}
-
-.stack > * + * {
-  margin-top: var(--gap, 20px);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.row--center {
-  justify-content: center;
-}
-
-.divider {
-  height: 1px;
-  border: 0;
-  margin: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--border),
-    transparent
-  );
-}
-
-/* ==========================================================================
-   Surfaces
-   ========================================================================== */
-
-.panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: clamp(20px, 3vw, 30px);
-  backdrop-filter: blur(12px);
-}
-
-.card {
+/* Each chapter is its own sheet with the landscape showing between them, so
+   the page reads as a walk past a run of boards rather than as a document. */
+.chapter {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  padding: 24px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  cursor: pointer;
-  transition:
-    border-color var(--base) var(--ease),
-    background-color var(--base) var(--ease),
-    transform var(--base) var(--ease),
-    box-shadow var(--base) var(--ease);
 }
 
-.card:hover,
-.card:focus-visible {
-  transform: translateY(-4px);
-  background: var(--surface-hover);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-  box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--accent) 90%, black);
-}
-
-.card__icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
+.chapter__number {
+  position: absolute;
+  top: clamp(18px, 3vw, 30px);
+  right: clamp(20px, 3.5vw, 38px);
+  font-family: var(--serif);
+  font-size: 2.2rem;
+  line-height: 1;
   color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  opacity: 0.22;
+  pointer-events: none;
 }
 
-.card__title {
-  font-size: 1.075rem;
+.chapter__head {
+  font-family: var(--serif);
+  font-size: 1.32rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--ink);
+  margin-bottom: 14px;
+  padding-right: 48px;
 }
 
-.card__text {
-  font-size: 0.95rem;
-  color: var(--text-muted);
-  flex: 1;
+.prose {
+  color: var(--paper-ink);
+  opacity: 0.88;
+  max-width: 66ch;
 }
 
-.card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+.prose + .prose {
+  margin-top: 14px;
+}
+
+.sprouts {
+  display: grid;
+  gap: 10px;
   margin-top: 4px;
 }
 
-.card__arrow {
-  display: grid;
-  place-items: center;
-  color: var(--accent);
-  opacity: 0.5;
-  transition:
-    transform var(--base) var(--ease),
-    opacity var(--base) var(--ease);
-}
-
-.card:hover .card__arrow {
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-.tag {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent);
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
-  white-space: nowrap;
-}
-
-/* ==========================================================================
-   Buttons
-   ========================================================================== */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 22px;
-  border-radius: 999px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--text);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  backdrop-filter: blur(12px);
-  transition:
-    border-color var(--base) var(--ease),
-    background-color var(--base) var(--ease),
-    color var(--base) var(--ease),
-    transform var(--base) var(--ease);
-}
-
-.btn:hover,
-.btn:focus-visible {
-  transform: translateY(-2px);
-  color: var(--accent);
-  background: var(--surface-hover);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
-}
-
-.btn:active {
-  transform: translateY(0);
-}
-
-.btn svg {
-  transition: transform var(--base) var(--ease);
-}
-
-.btn--back:hover svg {
-  transform: translateX(-3px);
-}
-
-.btn--fwd:hover svg {
-  transform: translateX(3px);
-}
-
-.btn--primary {
-  color: #08090d;
-  font-weight: 600;
-  border-color: transparent;
-  background: linear-gradient(100deg, var(--accent), var(--accent-2));
-  box-shadow: 0 14px 40px -18px color-mix(in srgb, var(--accent) 90%, black);
-}
-
-.btn--primary:hover,
-.btn--primary:focus-visible {
-  color: #08090d;
-  filter: brightness(1.08);
-}
-
-/* ==========================================================================
-   Content lists (detail pages)
-   ========================================================================== */
-
-.checklist {
-  display: grid;
-  gap: 10px;
-}
-
-.checklist li {
+.sprouts li {
   position: relative;
-  padding-left: 26px;
-  color: var(--text-muted);
+  padding-left: 28px;
+  color: var(--paper-ink);
+  opacity: 0.88;
 }
 
-.checklist li::before {
-  content: "";
+/* Leaf-shaped bullet. */
+.sprouts li::before {
+  content: '';
   position: absolute;
-  left: 6px;
-  top: 0.68em;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  left: 4px;
+  top: 0.6em;
+  width: 10px;
+  height: 10px;
   background: var(--accent);
+  border-radius: 0 100% 0 100%;
+  transform: rotate(-18deg);
 }
 
 .specs {
   display: grid;
-  gap: 0;
+  margin-top: 4px;
 }
 
 .specs > div {
   display: grid;
-  grid-template-columns: minmax(120px, 0.3fr) 1fr;
+  grid-template-columns: minmax(130px, 0.34fr) 1fr;
   gap: 20px;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
+  padding: 13px 0;
+  border-top: 1px solid var(--paper-edge);
 }
 
 .specs > div:first-child {
@@ -488,169 +1049,397 @@ button {
 }
 
 .specs dt {
-  font-family: var(--font-mono);
   font-size: 12px;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--accent);
-  padding-top: 3px;
+  padding-top: 4px;
 }
 
 .specs dd {
-  margin: 0;
-  color: var(--text-muted);
+  color: var(--paper-ink);
+  opacity: 0.88;
 }
 
-@media (max-width: 560px) {
+.chapter .media {
+  margin-top: 20px;
+}
+
+@media (max-width: 620px) {
   .specs > div {
     grid-template-columns: 1fr;
     gap: 4px;
   }
 }
 
-/* ==========================================================================
-   Navigation chrome
-   ========================================================================== */
+/* — Media placeholders ——————————————————————————————————— */
 
-.chrome {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 60;
-  display: flex;
+/* Hatched and half-transparent, so an empty slot reads as "to be filled"
+   rather than as a large blank panel of the design. */
+.media__frame {
+  aspect-ratio: var(--media-ratio, 16 / 9);
+  max-height: 48vh;
+  display: grid;
+  place-content: center;
+  justify-items: center;
   gap: 10px;
+  border-radius: 20px;
+  border: 1.5px dashed var(--paper-edge);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 12px,
+      color-mix(in srgb, var(--paper-edge) 45%, transparent) 12px 13px
+    ),
+    color-mix(in srgb, var(--paper) 88%, transparent);
+  backdrop-filter: blur(8px);
 }
 
-.chrome__btn {
+.media__mark {
   display: grid;
   place-items: center;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  color: var(--text);
-  border: 1px solid var(--border);
-  background: rgba(10, 12, 18, 0.66);
-  backdrop-filter: blur(14px);
-  transition:
-    color var(--base) var(--ease),
-    border-color var(--base) var(--ease),
-    background-color var(--base) var(--ease),
-    transform var(--base) var(--ease);
-}
-
-.chrome__btn:hover {
-  transform: translateY(-2px);
   color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  border: 1px solid var(--paper-edge);
 }
 
-.chrome__btn[aria-expanded="true"] {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 60%, transparent);
-  background: color-mix(in srgb, var(--accent) 14%, rgba(10, 12, 18, 0.7));
-}
-
-.map {
-  position: fixed;
-  top: 76px;
-  right: 20px;
-  z-index: 59;
-  width: min(340px, calc(100vw - 40px));
-  padding: 14px;
-  border-radius: var(--radius);
-  border: 1px solid var(--border);
-  background: rgba(8, 10, 15, 0.86);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 30px 70px -40px #000;
-  transform-origin: top right;
-}
-
-.map__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 0 4px 10px;
-}
-
-.map__crumbs {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
+.media__kind {
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--ink-soft);
+}
+
+.media__note {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+/* — Section plates ————————————————————————————————————————
+   One plate per thing below this section, each its own sheet with the hills
+   showing between them, alternating which side it leads from. */
+
+.plates {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(18px, 3vh, 32px);
+}
+
+.plate-row {
+  display: flex;
+  max-width: 92%;
+}
+
+.plate-row--right {
+  margin-left: auto;
+  justify-content: flex-end;
+}
+
+.plate {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+  text-align: left;
+  padding: clamp(18px, 2.4vw, 26px) clamp(20px, 2.6vw, 30px);
+  border-radius: 24px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  backdrop-filter: blur(16px) saturate(1.05);
+  box-shadow: 0 28px 64px -48px rgba(22, 16, 6, 0.8);
+  transition:
+    border-color 0.4s var(--ease),
+    transform 0.45s var(--ease),
+    box-shadow 0.45s var(--ease);
+}
+
+.plate:hover,
+.plate:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-5px) scale(1.012);
+  box-shadow: 0 40px 80px -46px rgba(22, 16, 6, 0.9);
+}
+
+.plate__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  color: var(--accent);
+  border: 1px solid var(--paper-edge);
+  transition:
+    background-color 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+
+.plate:hover .plate__mark {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  transform: rotate(-6deg);
+}
+
+.plate__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 
-.map__crumb {
-  transition: color var(--fast) var(--ease);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.plate__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.map__crumb:hover {
+.plate__title {
+  font-family: var(--serif);
+  font-size: clamp(1.16rem, 1.7vw, 1.34rem);
+  color: var(--ink);
+}
+
+.plate__status {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: var(--accent);
 }
 
-.map__crumb--current {
-  color: var(--accent);
+.plate__text {
+  color: var(--ink-soft);
+  font-size: 0.97rem;
 }
 
-.map__up {
+.plate__meta {
+  font-size: 0.79rem;
+  color: var(--ink-soft);
+  opacity: 0.72;
+}
+
+.plate__go {
+  margin-left: auto;
+  align-self: center;
+  color: var(--accent);
+  opacity: 0.4;
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.4s var(--ease);
+}
+
+.plate:hover .plate__go {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
+@media (max-width: 760px) {
+  .plate-row,
+  .plate-row--right {
+    max-width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* — Buttons ——————————————————————————————————————————— */
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  transition: color var(--fast) var(--ease);
-  white-space: nowrap;
+  gap: 9px;
+  padding: 11px 21px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  backdrop-filter: blur(12px);
+  transition:
+    color 0.35s var(--ease),
+    border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
 }
 
-.map__up:hover {
+.btn:hover,
+.btn:focus-visible {
   color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
 }
 
-.map__svg {
+.btn svg {
+  transition: transform 0.35s var(--ease);
+}
+
+.btn--back:hover svg {
+  transform: translateX(-3px);
+}
+
+.btn--primary {
+  color: var(--on-accent);
+  background: var(--accent);
+  border-color: transparent;
+}
+
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  color: var(--on-accent);
+  filter: brightness(1.06);
+}
+
+/* ==========================================================================
+   Foreground — the plane in front of the reader
+   ========================================================================== */
+
+/* Everything in here is scenery drawn over the page. It sits above the content
+   so text passes behind it, and it never takes a pointer event. */
+.fore {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.fore svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  filter: drop-shadow(0 14px 22px rgba(10, 18, 8, 0.3));
+}
+
+.fore--branch {
+  top: -22px;
+  left: -24px;
+  width: clamp(200px, 24vw, 330px);
+}
+
+.fore--plants {
+  bottom: -20px;
+  width: clamp(130px, 16vw, 230px);
+}
+
+.fore--plants-left {
+  left: -34px;
+}
+
+/* Mirrored on the inner svg, not the layer: the layer's own transform belongs
+   to the parallax spring and would be overwritten. */
+.fore--plants-right {
+  right: -34px;
+}
+
+.fore--plants-right svg {
+  transform: scaleX(-1);
+}
+
+.fore--drifters {
+  inset: 0;
+  overflow: clip;
+}
+
+/* These carry their own intrinsic size — the 100% width above would blow one
+   leaf up to fill the viewport. */
+.fore--drifters svg {
+  position: absolute;
+  left: 0;
+  width: 30px;
+  height: 14px;
+  filter: none;
+}
+
+@media (max-width: 760px) {
+  /* The column runs full-bleed here, so a branch in the corner would sit on
+     the text for the whole scroll rather than framing it. */
+  .fore--branch {
+    display: none;
+  }
+
+  .fore--plants {
+    width: 92px;
+    opacity: 0.75;
+  }
+}
+
+/* ==========================================================================
+   Map
+   ========================================================================== */
+
+.nav__toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  backdrop-filter: blur(14px);
+  transition:
+    color 0.35s var(--ease),
+    border-color 0.35s var(--ease),
+    transform 0.35s var(--ease);
+}
+
+.nav__toggle:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.nav__toggle[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.nav__panel {
+  position: fixed;
+  top: 78px;
+  right: 20px;
+  z-index: 79;
+  width: min(360px, calc(100vw - 40px));
+  padding: 14px;
+  border-radius: 22px;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  backdrop-filter: blur(20px) saturate(1.05);
+  box-shadow: 0 34px 74px -46px rgba(20, 14, 4, 0.8);
+  transform-origin: top right;
+}
+
+.nav__svg {
   display: block;
   width: 100%;
   height: auto;
   overflow: visible;
 }
 
-.map__node {
-  cursor: pointer;
-}
-
-.map__label {
+.nav__label {
   font-size: 10px;
-  font-weight: 500;
-  fill: var(--text-muted);
+  fill: var(--ink-soft);
   text-anchor: middle;
   dominant-baseline: middle;
   pointer-events: none;
-  transition: fill var(--fast) var(--ease);
 }
 
-.map__label--current {
-  fill: var(--text);
-}
-
-.map__hint {
-  padding: 8px 4px 0;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  opacity: 0.6;
-  text-align: center;
+.nav__label--current {
+  fill: var(--ink);
+  font-weight: 600;
 }
 
 /* ==========================================================================
@@ -666,7 +1455,9 @@ button {
     transition-duration: 0.01ms !important;
   }
 
-  .page__field {
+  .scene__motes,
+  .scene__clouds,
+  .fore--drifters {
     display: none;
   }
 }

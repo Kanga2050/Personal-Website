@@ -16,4 +16,22 @@ window.matchMedia ??= (query) => ({
 
 window.scrollTo = () => {};
 
+// framer-motion's whileInView needs one. Report every observed element as
+// visible immediately, so scroll-revealed content is assertable in tests.
+window.IntersectionObserver ??= class {
+  constructor(callback) {
+    this.callback = callback;
+  }
+
+  observe(target) {
+    this.callback([{ target, isIntersecting: true, intersectionRatio: 1 }], this);
+  }
+
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+};
+
 HTMLCanvasElement.prototype.getContext = () => null;
